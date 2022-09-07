@@ -5,6 +5,7 @@
 
 @section('content')
 {{-- blog --}}
+@if($list_blog->count() > 0)
 <div>
   <h2>Tin tức</h2>
   <div class="row">
@@ -21,8 +22,10 @@
     @endforeach
   </div>
 </div>
+@endif
 
 {{-- Bài học --}}
+@if($list_blog->count() > 0)
 <div class="mt-3">
   <h2>Khối học</h2>
   <div class="row">
@@ -46,6 +49,7 @@
     @endforeach
   </div>
 </div>
+@endif
 @stop
 
 @section('style')
