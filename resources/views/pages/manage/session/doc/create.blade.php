@@ -27,7 +27,7 @@
 <script>
   ClassicEditor.create(document.querySelector('#textarea_content'), {
     ckfinder: {
-      uploadUrl: "{{ route('ckfinder.upload').'?_token='.csrf_token() }}"
+      uploadUrl: "{{ '/ckfinder/upload?_token='.csrf_token() }}"
     }
   }).catch(e => {
     console.error(e)

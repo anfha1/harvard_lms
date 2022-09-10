@@ -32,7 +32,7 @@ class processppt extends Command
         # B1: truyền style và content vào 2 tệp ở bin
 
         # B2: sau đó nhập id là tên ppt vào đây
-        $id = '1662106087192';
+        $id = '1662559740000';
 
         # B3: nếu ppt không đúng thì chuyển thành false để báo lỗi
         $status = true;
