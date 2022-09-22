@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dc3a6317df2dbe46dc0022e1807be65a",
+    "content-hash": "b60024e9068d332fc1ab8f115e210019",
     "packages": [
         {
             "name": "brick/math",
@@ -896,6 +896,78 @@
                 }
             ],
             "time": "2022-08-28T14:45:39+00:00"
+        },
+        {
+            "name": "karkowg/php-mupdf",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/karkowg/php-mupdf.git",
+                "reference": "d64c39167e819606ef7f4a36cc19139f86390187"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/karkowg/php-mupdf/zipball/d64c39167e819606ef7f4a36cc19139f86390187",
+                "reference": "d64c39167e819606ef7f4a36cc19139f86390187",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0",
+                "symfony/process": "^6.0"
+            },
+            "require-dev": {
+                "pestphp/pest": "^1.21",
+                "squizlabs/php_codesniffer": "^3.0"
+            },
+            "bin": [
+                "bin/mutool"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Karkow\\MuPdf\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Gustavo Karkow",
+                    "email": "karkowg@gmail.com",
+                    "homepage": "https://github.com/karkowg",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Minimal PDF to image converter using MuPDF",
+            "homepage": "https://github.com/karkowg/php-mupdf",
+            "keywords": [
+                "convert",
+                "image",
+                "karkowg",
+                "mupdf",
+                "mutool",
+                "pdf",
+                "pdf-to-image",
+                "php-mupdf"
+            ],
+            "support": {
+                "issues": "https://github.com/karkowg/php-mupdf/issues",
+                "source": "https://github.com/karkowg/php-mupdf/tree/v2.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/karkowg",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-08-12T00:21:40+00:00"
         },
         {
             "name": "laravel/framework",
@@ -7714,5 +7786,5 @@
         "php": "^8.0.2"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.2.0"
 }

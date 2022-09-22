@@ -14,6 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// đây là thông tin của pdf view
+Route::post('/loguseractivity/create-many-async', function(Request $request) {
+    return response()->json([
+        '$id' => '1',
+        'succeeded' => true
+    ], 200, ['Content-Type' => 'application/json;charset=UTF-8', 'Charset' => 'utf-8'], JSON_UNESCAPED_UNICODE);
+});
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

@@ -1,0 +1,205 @@
+/* Minification failed. Returning unminified contents.
+(50,25): run-time error CSS1038: Expected hex color, found '#ffff'
+ */
+#banner-advertisement {
+    position: absolute;
+    height: 100vh;
+    width: 120px;
+    z-index: 100;
+    right: 0;
+    transition: all 0.5s ease;
+    transform: translate(120px, 0);
+}
+
+#box-iconavs {
+    width: 50px;
+    position: absolute;
+    right: 0;
+    bottom: 10%;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    transform: translate(50px, 0);
+}
+
+#logo-ads {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: absolute;
+    z-index: 1;
+    height: 90vh;
+}
+
+.patten-ads {
+    position: absolute;
+    width: 100%;
+    height: auto;
+    bottom: 0;
+    z-index: 0;
+}
+
+.text-version {
+    width: 85%;
+    height: auto;
+    margin-top: 15px;
+}
+
+.box-textAds {
+    width: 75%;
+    height: 25px;
+    background-color: #fd9c1c;
+    border: 2.5px solid #ffff;
+    border-radius: 25px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 5px #fd9c1c;
+}
+
+.txt-avs {
+    color: white;
+    text-shadow: 0px 2px 1px #c17575;
+    font-size: 12px;
+    font-family: 'MontserratBold';
+}
+
+#countdown {
+    position: relative;
+    margin: auto;
+    height: 40px;
+    width: 40px;
+    text-align: center;
+    overflow: hidden;
+    background-color: #ffffff73;
+    border-radius: 50%;
+}
+
+#countdown-number {
+    color: white;
+    display: inline-block;
+    line-height: 40px;
+    font-family: 'MontserratBold';
+    margin-right: 1px;
+    font-size: 1.3vw;
+    text-shadow: 1px 2px 1px #7d7b7bcc;
+}
+
+#txt-countdown-number {
+    color: white;
+    display: inline-block;
+    line-height: 40px;
+    font-family: 'MontserratBold';
+    margin-right: 1px;
+    font-size: 1.3vw;
+    text-shadow: 1px 2px 1px #7d7b7bcc;
+}
+
+#countdown svg {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    transform: rotateY(-180deg) rotateZ(-90deg);
+    /* background-color: #ffffff8a; */
+}
+
+    #countdown svg circle {
+        stroke-dasharray: 113px;
+        stroke-dashoffset: 0px;
+        stroke-linecap: round;
+        stroke-width: 3px;
+        stroke: white;
+        fill: none;
+        /*        animation: countdown 7s linear infinite forwards;*/
+    }
+
+@keyframes countdown {
+    from {
+        stroke-dashoffset: 0px;
+    }
+
+    to {
+        stroke-dashoffset: 113px;
+    }
+}
+
+.item-appInAdvertisement {
+    width: 85%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fd9b1c;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.box-itemApp {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px 0;
+}
+
+.btn-readNow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #626ae3;
+    padding: 3px 5px;
+    border-radius: 8px;
+    box-shadow: 0px 4px #4d56e3;
+    margin: 5px 0 8px 0;
+    width: 90%;
+    cursor: pointer;
+}
+
+.img-itemApp {
+    height: auto;
+    width: auto;
+    max-width: 50%;
+    max-height: 50px;
+}
+
+.txt-btnReadNow {
+    color: white;
+    font-family: 'MontserratBold';
+    font-size: 11px;
+}
+
+.text-nameApp {
+    color: #286cad;
+    font-family: 'MontserratBold';
+    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: center;
+    margin-top: 8px;
+    width: 90%;
+}
+
+#icon-close {
+    position: absolute;
+    z-index: 2;
+    width: 26px;
+    height: auto;
+    top: 5%;
+    left: -12px;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    transform: translate(20px, 0);
+}
+

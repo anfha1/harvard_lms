@@ -20,12 +20,21 @@ use App\Http\Controllers\Api\Manage\Role as ControllersApiManageRole;
 use App\Http\Controllers\View\Home as ControllersViewHome;
 use App\Http\Controllers\View\Manage as ControllersViewManage;
 use App\Http\Controllers\View\Ppt as ControllersViewPpt;
+use App\Http\Controllers\View\Pdf as ControllersViewPdf;
 use App\Http\Controllers\View\Doc as ControllersViewDoc;
 use App\Http\Controllers\View\Blog as ControllersViewBlog;
 use App\Http\Controllers\View\Manage\User as ControllersViewManageUser;
 use App\Http\Controllers\View\Manage\Course as ControllersViewManageCourse;
 use App\Http\Controllers\View\Manage\Blog as ControllersViewManageBlog;
 use App\Http\Controllers\View\Manage\Session as ControllersViewManageSession;
+
+Route::get('/pdf', [ControllersViewPdf::class, 'view']);
+Route::post('/Base/CheckLangCookie', function() {
+    return 'true';
+});
+Route::post('/Banner/GetBannerAdvertisement', function() {
+    return view('other.baner');
+});
 
 // demo hiển thị powerpoint
 Route::get('/ppt/{id_ppt}/{id_session}', [ControllersViewPpt::class, 'view'])->name('ppt.view')->where('id_ppt', '[0-9]+')->where('id_session', '[0-9]+');
