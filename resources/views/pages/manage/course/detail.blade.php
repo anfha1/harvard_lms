@@ -165,17 +165,17 @@
                         ])
                         @endcomponent
                     @else
-                        <a class="btn btn-sm btn-primary" href="{{ route('manage.doc.create', ['id' => $session->id]) }}">Thêm tài liệu</a>
+                        <a class="btn btn-sm btn-primary" href="{{ route('manage.doc.create', ['id' => $session->id]) }}">Viết tài liệu</a>
                     @endif
                 </div>
                 @endif
             </div>
             <div class="list-group-item list-group-item-action">
-                <span>Powerpoint:</span> <span id="nameppt">{{ ($session->lppt_id ? $session->ppt->nameor : 'Chưa có') }}</span>
+                <span>Powerpoint:</span> <span id="nameppt_{{ $session->id }}">{{ ($session->lppt_id ? $session->ppt->nameor : 'Chưa có') }}</span>
                 @if ($info_user->role === 1)
                 <div class="btn-group float-right" role="group">
                     @if ($session->lppt_id)
-                        <label for="create_ppt_input_{{ $session->id }}" class="btn btn-sm btn-primary" style="margin: 0;">Sửa powerpoint</label>
+                        <label for="create_ppt_input_{{ $session->id }}" class="btn btn-sm btn-primary" style="margin: 0;">Tải lại powerpoint</label>
 
                         <button type="button" class="btn btn-sm btn-danger" onclick="$('#del_ppt_{{ $session->id }}').submit()">Xóa powerpoint</button>
                         {{-- Xóa powerpoint --}}
@@ -197,7 +197,7 @@
                         ])
                         @endcomponent
                     @else
-                        <label for="create_ppt_input_{{ $session->id }}" class="btn btn-sm btn-primary" style="margin: 0;">Thêm powerpoint</label>
+                        <label for="create_ppt_input_{{ $session->id }}" class="btn btn-sm btn-primary" style="margin: 0;">Tải lên</label>
                     @endif
 
                     <input type="file" name="ppt" id="create_ppt_input_{{ $session->id }}" style="display: none;" />
@@ -205,25 +205,28 @@
                         $('#create_ppt_input_{{ $session->id }}').change(function(e) {
                             $('#create_ppt_input_{{ $session->id }}').hide();
                             var nameUpload = e.target.files[0].name
+                            var elName = $('#nameppt_{{ $session->id }}')
                             if (e.target.files[0] && confirm(`Bạn có chắc chắn muốn tải lên ${ nameUpload }?`)) {
-                                var nameBackup = $('#nameppt').text();
+                                var nameBackup = elName.text();
                                 let data = new FormData();
                                 data.append('ppt', e.target.files[0]);
                                 data.append('id_session', {{ $session->id }});
                                 data.append('_token', '{{ csrf_token() }}');
+                                elName.text(nameUpload + ' - Đang tải lên')
+                                console.log('vô 2', elName)
                                 axios.post('/manage/ppt/upload', data, {
                                     onUploadProgress: progressEvent => {
                                         if (progressEvent.loaded === progressEvent.total) {
-                                            $('#nameppt').text(nameUpload + ' - Đang xử lý')
+                                            elName.text(nameUpload + ' - Đang xử lý')
                                         } else {
-                                            $('#nameppt').text(nameUpload + ' - Đang tải lên ' + showProcess(progressEvent))
+                                            elName.text(nameUpload + ' - Đang tải lên ' + showProcess(progressEvent))
                                         }
                                     },
                                 }).then(res => {
                                     if (res.data.status) {
                                         location.reload();
                                     } else {
-                                        $('#nameppt').text(nameBackup)
+                                        elName.text(nameBackup)
                                     }
                                     $('#create_ppt_input_{{ $session->id }}').show();
                                 });
@@ -235,7 +238,7 @@
             </div>
         </div>
     </div>
-    
+
     {{-- Chức năng của admin --}}
     @if ($info_user->role === 1)
     <div class="collapse" id="collapse_rename_session_{{ $session->id }}" data-parent="#accordion_info_session  ">
@@ -267,7 +270,7 @@
             ])
                 <button type="button" class="btn btn-danger" data-toggle="collapse" href="#collapse_rename_session_{{ $session->id }}">Hủy</button>
             @endcomponent
-            
+
         </div>
     </div>
     @endif
