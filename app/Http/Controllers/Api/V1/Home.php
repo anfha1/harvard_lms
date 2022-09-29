@@ -307,21 +307,24 @@ class Home extends Controller
                     // kiểm tra xem file đã có chưa
                     $path_file_info = "/pdf/info/{$session_info->id}.json";
                     if ($session_info->doctype) {
-                        $pdf_info = json_decode(Storage::get($path_file_info), 1);
+                        $data = Storage::get($path_file_info);
+                        if ($data) {
+                            $pdf_info = json_decode($data, 1);
 
-                        // xóa file pdf cũ
-                        $file_pdf = public_path('upload/pdf').'/'.$pdf_info['name'];
-                        if (is_file($file_pdf)) {
-                            unlink($file_pdf);
-                        }
-
-                        // xóa folder pdf nếu đã process xong
-                        $folder_pdf = public_path('pdf').'/'.$pdf_info['idc'];
-                        if (is_dir($folder_pdf)) {
-                            foreach (File::allFiles($folder_pdf) as $file) {
-                                unlink($file);
+                            // xóa file pdf cũ
+                            $file_pdf = public_path('upload/pdf').'/'.$pdf_info['name'];
+                            if (is_file($file_pdf)) {
+                                unlink($file_pdf);
                             }
-                            rmdir($folder_pdf);
+
+                            // xóa folder pdf nếu đã process xong
+                            $folder_pdf = public_path('pdf').'/'.$pdf_info['idc'];
+                            if (is_dir($folder_pdf)) {
+                                foreach (File::allFiles($folder_pdf) as $file) {
+                                    unlink($file);
+                                }
+                                rmdir($folder_pdf);
+                            }
                         }
                     } else {
                         // cập nhật thông tin df
