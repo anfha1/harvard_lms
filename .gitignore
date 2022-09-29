@@ -4,6 +4,10 @@
 /public/storage
 /storage/*.key
 /vendor
+/node/node_modules
+/public/pdf
+/public/ppt
+/public/upload
 .env
 .env.backup
 .phpunit.result.cache
