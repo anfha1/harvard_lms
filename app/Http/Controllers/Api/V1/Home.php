@@ -179,18 +179,24 @@ class Home extends Controller
                                 'ppt_info' => [],
                             ];
                             if ($session->ppttype == 1) {
-                                $info_ppt = json_decode(Storage::get("/ppt/info/{$session->id}.json"), 1);
-                                $session_info['ppt_info'] = [
-                                    'status' => $info_ppt['status'],
-                                    'name' => $info_ppt['nameor'],
-                                ];
+                                $data = Storage::get("/ppt/info/{$session->id}.json");
+                                if ($data) {
+                                    $info_ppt = json_decode($data, 1);
+                                    $session_info['ppt_info'] = [
+                                        'status' => $info_ppt['status'],
+                                        'name' => $info_ppt['nameor'],
+                                    ];
+                                }
                             }
                             if ($session->doctype == 1) {
-                                $info_ppt = json_decode(Storage::get("/pdf/info/{$session->id}.json"), 1);
-                                $session_info['doc_info'] = [
-                                    'status' => $info_ppt['status'],
-                                    'name' => $info_ppt['nameor'],
-                                ];
+                                $data = Storage::get("/pdf/info/{$session->id}.json");
+                                if ($data) {
+                                    $info_ppt = json_decode($data, 1);
+                                    $session_info['doc_info'] = [
+                                        'status' => $info_ppt['status'],
+                                        'name' => $info_ppt['nameor'],
+                                    ];
+                                }
                             }
                             $list_session[] = $session_info;
                         }
