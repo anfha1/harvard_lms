@@ -1,11 +1,5 @@
 @php
-  $listImg = [
-    'https://material3.eduhome.com.vn/digitaldata/Content/DataEBook/Book1093/f248d466-93a8-4b8c-ae7e-782bd78867e0.png',
-    'https://material3.eduhome.com.vn/digitaldata/Content/DataEBook/Book1093/d440ca0b-b99a-4f8b-a202-93a0f47a9e37.png',
-    'https://material3.eduhome.com.vn/digitaldata/Content/DataEBook/Book1093/b3649671-1966-4e8c-b3d6-8c91b9ee15cd.png',
-    'https://material3.eduhome.com.vn/digitaldata/Content/DataEBook/Book1093/b274c1c6-61cb-430c-b079-130989bb58f7.png',
-    'https://blog.logrocket.com/wp-content/uploads/2021/01/font-awesome-referencing-svg-files.png',
-  ];
+  $listImg = $list_photo;
 @endphp
 
 @extends('layouts.pdf')

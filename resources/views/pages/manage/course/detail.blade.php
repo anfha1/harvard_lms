@@ -213,7 +213,6 @@
                                 data.append('id_session', {{ $session->id }});
                                 data.append('_token', '{{ csrf_token() }}');
                                 elName.text(nameUpload + ' - Đang tải lên')
-                                console.log('vô 2', elName)
                                 axios.post('/manage/ppt/upload', data, {
                                     onUploadProgress: progressEvent => {
                                         if (progressEvent.loaded === progressEvent.total) {
