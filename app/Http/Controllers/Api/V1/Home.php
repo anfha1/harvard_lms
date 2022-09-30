@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
+use App\Jobs\Pdf;
+
 use App\Models\luser;
 use App\Models\lcourse;
 use App\Models\lsession;
@@ -332,28 +334,12 @@ class Home extends Controller
                         $session_info->save();
                     }
 
-                    // xử lý pdf
-                    $file_pdf = public_path('upload/pdf').'/'.$file_upload_info['name'];
-                    $folder_pdf = public_path('pdf');
-                    if (!is_dir($folder_pdf)) {
-                        mkdir($folder_pdf);
-                    }
-                    $folder_pdf .= '/'.$file_upload_info['idc'];
-                    if (!is_dir($folder_pdf)) {
-                        mkdir($folder_pdf);
-                    }
-
-                    // tạo và lưu lại ảnh
-                    $pdf = new \Spatie\PdfToImage\Pdf($file_pdf);
-                    $file_upload_info['list'] = [];
-                    for ($i = 0; $i < $pdf->getNumberOfPages(); $i++) {
-                        $pdf->setPage(($i+1))->saveImage($folder_pdf.'/page-'.$i.'.jpg');
-                        $file_upload_info['list'][] =  "/pdf/{$file_upload_info['idc']}/page-{$i}.jpg";
-                    }
-                    $file_upload_info['status'] = 1;
-
                     // lưu lại thông tin file
                     Storage::put($path_file_info, json_encode($file_upload_info));
+
+                    // chuyển pdf thành ảnh
+                    $file_pdf = public_path('upload/pdf').'/'.$file_upload_info['name'];
+                    Pdf::dispatch($file_upload_info['idc'], $file_pdf, $path_file_info);
 
                     $res['status'] = 1;
                     $res['msg'] = 'Tải lên thành công';

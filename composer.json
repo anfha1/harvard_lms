@@ -12,6 +12,7 @@
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
         "league/flysystem-ftp": "3.0",
+        "predis/predis": "^2.0",
         "spatie/pdf-to-image": "^1.2"
     },
     "require-dev": {
