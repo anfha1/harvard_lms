@@ -338,8 +338,7 @@ class Home extends Controller
                     Storage::put($path_file_info, json_encode($file_upload_info));
 
                     // chuyển pdf thành ảnh
-                    $file_pdf = public_path('upload/pdf').'/'.$file_upload_info['name'];
-                    Pdf::dispatch($file_upload_info['idc'], $file_pdf, $path_file_info);
+                    Pdf::dispatch($file_upload_info['idc'], $file_upload_info['name'], $path_file_info);
 
                     $res['status'] = 1;
                     $res['msg'] = 'Tải lên thành công';
