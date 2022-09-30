@@ -9,7 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
-use Fai\Lib\Pdf;
+// use Fai\Lib\Pdf;
 
 class Pdf implements ShouldQueue
 {
@@ -54,9 +54,43 @@ class Pdf implements ShouldQueue
      * @return void
      */
     public function handle() {
-        if (!$this->c2()) {
-            $this->c1();
+        $text_cmd = 'gswin64 -dBATCH -dNOPAUSE';
+        $text_cmd .= ' -sDEVICE=jpeg -dJPEGQ=95 -r600x600';
+        $text_cmd .= ' -o "'.$this->folder_pdf.'/bar_%d.jpg"';
+        $text_cmd .= " \"{$this->path}\"";
+        exec($text_cmd, $output, $retval);
+
+        $num = count(glob($this->folder_pdf.'/bar_*.jpg'));
+        if ($num > 0) {
+            $num++;
+            $status = true;
+
+            $this->file_upload_info['status'] = 2; // chuyển qua chế độ xử lý
+            $this->update_status();
+
+            $list_file = [];
+            for ($i = 1; $i < $num; $i++) {
+                if (is_file($this->folder_pdf."/bar_{$i}.jpg")) {
+                    $name_file = 'page-'.$i.'-'.((int)(microtime(1)*1000)).'.jpg';
+                    rename($this->folder_pdf."/bar_{$i}.jpg", $this->folder_pdf.'/'.$name_file);
+                    $list_file[] = "/pdf/{$this->idc}/$name_file";
+                } else {
+                    $status = false;
+                    break;
+                }
+            }
+            if ($status) {
+                // lưu lại kết quả
+                $this->file_upload_info['status'] = 1; // Xử lý hoàn tất
+                $this->file_upload_info['list'] = $list_file;
+            } else {
+                $this->file_upload_info['status'] = 3; // lỗi rồi
+            }
+
+        } else {
+            $this->file_upload_info['status'] = 3; // lỗi rồi
         }
+        $this->update_status();
     }
 
     private function c1() {
@@ -91,22 +125,21 @@ class Pdf implements ShouldQueue
         $this->update_status();
     }
 
-    private function c2() {
-        $data = Pdf::toJpg('https://giaoducharavard.edu.vn/upload/pdf/'.$this->name, $this->folder_pdf)
-        // $data = Pdf::toJpg('https://bytescout-com.s3-us-west-2.amazonaws.com/files/demo-files/cloud-api/pdf-to-image/sample.pdf', $this->folder_pdf);
+    // private function c2() {
+    //     $data = Pdf::toJpg('https://giaoducharavard.edu.vn/upload/pdf/'.$this->name, $this->folder_pdf);
+    //     // $data = Pdf::toJpg('https://bytescout-com.s3-us-west-2.amazonaws.com/files/demo-files/cloud-api/pdf-to-image/sample.pdf', $this->folder_pdf);
 
-        if ($data['status']) {
-            $this->file_upload_info['status'] = 1;
-            foreach ($data['list_file'] as $file) {
-                $this->file_upload_info['list'] = $this->folder_pdf.'/'.$file;
-            }
-            $this->update_status();
-            return true;
-        } else {
-            return false;
-        }
-
-    }
+    //     if ($data['status']) {
+    //         $this->file_upload_info['status'] = 1;
+    //         foreach ($data['list_file'] as $file) {
+    //             $this->file_upload_info['list'] = $this->folder_pdf.'/'.$file;
+    //         }
+    //         $this->update_status();
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
 
     private function update_status() {
         Storage::put($this->path_file_info, json_encode($this->file_upload_info));
