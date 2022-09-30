@@ -52,7 +52,8 @@ class Pdf implements ShouldQueue
      */
     public function handle()
     {
-        $pdf = new \Spatie\PdfToImage\Pdf($this->path)->setColorspace(\Imagick::COLORSPACE_RGB)->setOutputFormat('jpg');
+        $pdf = new \Spatie\PdfToImage\Pdf($this->path);
+        $pdf->setColorspace(\Imagick::COLORSPACE_RGB)->setOutputFormat('jpg');
         $this->file_upload_info['page'] = $numpage = $pdf->getNumberOfPages(); // lưu lại số trang
         $this->file_upload_info['status'] = 2; // chế độ dang xử lý
         $this->update_status(); // lưu lại khởi động
