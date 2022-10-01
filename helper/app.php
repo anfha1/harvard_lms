@@ -57,4 +57,17 @@ class App {
         }
         rmdir($dir);
     }
+
+    public static function auth($info, $role = 2) {
+        /** Role
+         * 1: Quyền quản trị viên
+         * 2: Quyền cộng tác viên
+        */
+
+        if (is_array($role)) {
+            return in_array(((int)$info['role']), $role);
+        } else {
+            return ((int)$info['role']) === $role;
+        }
+    }
 }

@@ -55,6 +55,12 @@ Route::post('/course', [ControllersApiV1Home::class, 'course']);
 // lấy danh sách khóa học với trang thái quản trị viên
 Route::post('/manage/course', [ControllersApiV1Home::class, 'manage_course']);
 
+// tạo lớp | khối mới
+Route::post('/manage/course/create', [ControllersApiV1Home::class, 'manage_course_create']);
+
+// xóa lớp
+Route::post('/manage/course/delete', [ControllersApiV1Home::class, 'manage_course_delete']);
+
 // upload file ppt
 Route::post('/manage/ppt/upload', [ControllersApiV1Home::class, 'manage_ppt_upload']);
 

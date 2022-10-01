@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 use App\Jobs\Pdf;
 
@@ -225,12 +226,73 @@ class Home extends Controller
         return App::response($res);
     }
 
-    // app giả để che mắt thôi
-    public function loguseractivity(Request $request) {
-        return App::response([
-            'id' => '1',
-            'succeeded' => true
-        ]);
+    // tạo Khối (lớp) mới yêu cầu quyền admin
+    public function manage_course_create(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) {
+                if (Validate::name($res, $request->all(), 'name', 'Tên lớp')) {
+                    // tiến hành tạo :))
+                    $course = new lcourse;
+                    $course->name = $request->name;
+                    $course->slug = Str::slug($request->name, '-');
+                    if (!empty($request->description)) {
+                        $course->description = $request->description;
+                    }
+
+                    if ($request->file('image')) {
+                        $file = $request->file('image');
+                        $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                        $file->move(public_path('upload/photo'), $filename);
+                        $course->photo = '/upload/photo/' . $filename;
+                    } else {
+                        $imgs = config('app.photo');
+                        $course->photo = $imgs[rand(0, count($imgs)-1)];
+                    }
+                    $course->save();
+                    $res['status'] = 1;
+                    $res['msg'] = 'Đã tạo lớp thành công';
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+        }
+
+        return App::response($res);
+    }
+
+    public function manage_course_delete(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res();
+        $request_all = $request->all();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) {
+                if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
+                    // tiến hành tạo :))
+                    $course = lcourse::find($request_all['course_id']);
+                    if ($course) {
+                        $course->delete();
+                        $res['status'] = 1;
+                        $res['msg'] = 'Đã tạo lớp thành công';
+                    } else {
+                        $res['msg'] = 'Lớp (khối) không toonf tại haowcj đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+        }
+
+        return App::response($res);
     }
 
     public function manage_ppt_upload(Request $request) {
@@ -348,5 +410,13 @@ class Home extends Controller
             }
         }
         return $res;
+    }
+
+    // app giả để che mắt thôi
+    public function loguseractivity(Request $request) {
+        return App::response([
+            'id' => '1',
+            'succeeded' => true
+        ]);
     }
 }
