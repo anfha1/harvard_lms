@@ -55,6 +55,12 @@ Route::post('/course', [ControllersApiV1Home::class, 'course']);
 // lấy danh sách khóa học với trang thái quản trị viên
 Route::post('/manage/course', [ControllersApiV1Home::class, 'manage_course']);
 
+// mở hiển thị
+Route::post('/manage/course/show', [ControllersApiV1Home::class, 'manage_course_show']);
+
+// tắt hiển thị
+Route::post('/manage/course/off', [ControllersApiV1Home::class, 'manage_course_off']);
+
 // tạo lớp | khối mới
 Route::post('/manage/course/create', [ControllersApiV1Home::class, 'manage_course_create']);
 

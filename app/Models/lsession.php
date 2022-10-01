@@ -10,7 +10,4 @@ class lsession extends Model {
     public function course() {
         return $this->belongsTo(lcourse::class, 'lcourse_id');
     }
-    public function ppt() {
-        return $this->belongsTo(lppt::class, 'lppt_id');
-    }
 }

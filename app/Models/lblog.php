@@ -9,13 +9,4 @@ use Illuminate\Database\Eloquent\Model;
 class lblog extends Model
 {
     use HasFactory;
-
-    // public function getCreatedAtAttribute($date) {
-    //     // dd(Carbon::createFromFormat('Y-m-d H:i:s', $date)->format('H:i:s d/m/Y'));
-    //     return Carbon::createFromFormat('Y-m-d H:i:s', $date);
-    // }
-
-    // public function getUpdatedAtAttribute($date) {
-    //     return Carbon::createFromFormat('Y-m-d H:i:s', $date)->format('H:i:s d/m/Y');
-    // }
 }

@@ -125,16 +125,26 @@ class Home extends Controller
                     'id' => $session->id,
                     'name' => $session->name,
                     'photo' => $session->photo,
-                    'doc_type' => $session->doctype,
-                    'doc_info' => [],
-                    'ppt_type' => $session->ppttype,
+                    'ppt_type' => 0,
+                    'doc_type' => 0,
                 ];
                 if ($session->ppttype == 1) {
-                    $info_ppt = json_decode(Storage::get("/ppt/info/{$session->id}.json"), 1);
-                    $session_info['ppt_info'] = [
-                        'status' => $info_ppt['status'],
-                        'name' => $info_ppt['nameor'],
-                    ];
+                    $data = Storage::get("/ppt/info/{$session->id}.json");
+                    if ($data) {
+                        $info = json_decode($data, 1);
+                        if ($info['status'] == 1) {
+                            $session_info['ppt_type'] = 1;
+                        }
+                    }
+                }
+                if ($session->doctype == 1) {
+                    $data = Storage::get("/pdf/info/{$session->id}.json");
+                    if ($data) {
+                        $info = json_decode($data, 1);
+                        if ($info['status'] == 1) {
+                            $session_info['doc_type'] = 1;
+                        }
+                    }
                 }
                 $list_session[] = $session_info;
             }
@@ -266,6 +276,69 @@ class Home extends Controller
         return App::response($res);
     }
 
+    // tắt hiển thị
+    public function manage_course_off(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res();
+        $request_all = $request->all();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], [1, 2])) {
+                if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
+                    // tiến hành tạo :))
+                    $course = lcourse::find($request_all['course_id']);
+                    if ($course) {
+                        $course->status = 0;
+                        $course->save();
+                        $res['status'] = 1;
+                        $res['msg'] = 'Đã tắt thành công';
+                    } else {
+                        $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+        }
+
+        return App::response($res);
+    }
+
+    // hiển thị
+    public function manage_course_show(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res();
+        $request_all = $request->all();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], [1, 2])) {
+                if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
+                    // tiến hành tạo :))
+                    $course = lcourse::find($request_all['course_id']);
+                    if ($course) {
+                        $course->status = 1;
+                        $course->save();
+                        $res['status'] = 1;
+                        $res['msg'] = 'Đã mở thành công';
+                    } else {
+                        $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+        }
+
+        return App::response($res);
+    }
+
+    // xoá khối (lớp)
     public function manage_course_delete(Request $request) {
         $info = App::CheckLogin($request);
         $res = App::Res();
@@ -281,7 +354,7 @@ class Home extends Controller
                         $res['status'] = 1;
                         $res['msg'] = 'Đã tạo lớp thành công';
                     } else {
-                        $res['msg'] = 'Lớp (khối) không toonf tại haowcj đã bị xóa vui lòng kiểm tra lại!';
+                        $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
                 }
             } else {
