@@ -45,17 +45,15 @@ class App {
         ], JSON_UNESCAPED_UNICODE);
     }
 
-    public static function deleteDir($dir) {
-        $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
-        $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
-        foreach($files as $file) {
-            if ($file->isDir()){
-                rmdir($file->getRealPath());
-            } else {
-                unlink($file->getRealPath());
+    public static function deleteDir($folder) {
+        foreach (glob($folder.'/*') as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            } else if (is_dir($file)) {
+                self::deleteDir($file);
             }
         }
-        rmdir($dir);
+        rmdir($folder);
     }
 
     public static function auth($info, $role = 2) {

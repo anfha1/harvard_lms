@@ -232,6 +232,7 @@ class Home extends Controller
             }
         } else {
             $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
         }
         return App::response($res);
     }
@@ -271,12 +272,64 @@ class Home extends Controller
             }
         } else {
             $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
         }
 
         return App::response($res);
     }
 
-    // tắt hiển thị
+    // sửa Khối (lớp) yêu cầu quyền admin
+    public function manage_course_edit(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) {
+                $change = false;
+                if (!empty($request->name) && $request->name != $course->name) {
+                    if (Validate::name($res, $request->all(), 'name', 'Tên lớp')) {
+                        // tiến hành tạo :))
+                        $course = new lcourse;
+                        $course->name = $request->name;
+                        $course->slug = Str::slug($request->name, '-');
+                        $change = true;
+                    }
+                }
+
+                if (!empty($request->description) && $request->description != $course->description) {
+                    $course->description = $request->description;
+                    $change = true;
+                }
+
+                if ($request->file('image')) {
+                    $file = $request->file('image');
+                    $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                    $file->move(public_path('upload/photo'), $filename);
+                    $course->photo = '/upload/photo/' . $filename;
+                    $change = true;
+                }
+
+                if ($change) {
+                    $course->save();
+                    $res['status'] = 1;
+                    $res['msg'] = 'Đã sửa lớp thành công';
+                } else {
+                    $res['msg'] = 'Không có gì thay đổi!';
+                }
+
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+
+        return App::response($res);
+    }
+
+    // tắt hiển thị lớp
     public function manage_course_off(Request $request) {
         $info = App::CheckLogin($request);
         $res = App::Res();
@@ -288,10 +341,14 @@ class Home extends Controller
                     // tiến hành tạo :))
                     $course = lcourse::find($request_all['course_id']);
                     if ($course) {
-                        $course->status = 0;
-                        $course->save();
-                        $res['status'] = 1;
-                        $res['msg'] = 'Đã tắt thành công';
+                        if ($course->status == 1) {
+                            $course->status = 0;
+                            $course->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã tắt thành công';
+                        } else {
+                            $res['msg'] = 'Lốp (khối) đang tắt';
+                        }
                     } else {
                         $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
@@ -302,12 +359,13 @@ class Home extends Controller
             }
         } else {
             $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
         }
 
         return App::response($res);
     }
 
-    // hiển thị
+    // hiển thị lớp
     public function manage_course_show(Request $request) {
         $info = App::CheckLogin($request);
         $res = App::Res();
@@ -319,10 +377,14 @@ class Home extends Controller
                     // tiến hành tạo :))
                     $course = lcourse::find($request_all['course_id']);
                     if ($course) {
-                        $course->status = 1;
-                        $course->save();
-                        $res['status'] = 1;
-                        $res['msg'] = 'Đã mở thành công';
+                        if ($course->status) {
+                            $res['msg'] = 'Lốp (khối) đang hiển thị';
+                        } else {
+                            $course->status = 1;
+                            $course->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã mở thành công';
+                        }
                     } else {
                         $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
@@ -333,6 +395,7 @@ class Home extends Controller
             }
         } else {
             $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
         }
 
         return App::response($res);
@@ -363,87 +426,385 @@ class Home extends Controller
             }
         } else {
             $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
         }
 
         return App::response($res);
     }
 
+    // tạo tiết mới yêu cầu quyền admin
+    public function manage_session_create(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) {
+                if (Validate::name($res, $request->all(), 'name', 'Tên tiết')) {
+                    // tiến hành tạo :))
+                    $session = new lsession;
+                    $session->name = $request->name;
+                    $session->slug = Str::slug($request->name, '-');
+                    if (!empty($request->description)) {
+                        $session->description = $request->description;
+                    }
+
+                    if ($request->file('image')) {
+                        $file = $request->file('image');
+                        $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                        $file->move(public_path('upload/photo'), $filename);
+                        $session->photo = '/upload/photo/' . $filename;
+                    } else {
+                        $imgs = config('app.photo');
+                        $session->photo = $imgs[rand(0, count($imgs)-1)];
+                    }
+                    $session->save();
+                    $res['status'] = 1;
+                    $res['msg'] = 'Đã tạo tiết thành công';
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+
+        return App::response($res);
+    }
+
+    // sửa tiết yêu cầu quyền admin
+    public function manage_session_edit(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) {
+                $change = false;
+                if (!empty($request->name) && $request->name != $session->name) {
+                    if (Validate::name($res, $request->all(), 'name', 'Tên tiết')) {
+                        // tiến hành tạo :))
+                        $session = new lsession;
+                        $session->name = $request->name;
+                        $session->slug = Str::slug($request->name, '-');
+                        $change = true;
+                    }
+                }
+
+                if (!empty($request->description) && $request->description != $session->description) {
+                    $session->description = $request->description;
+                    $change = true;
+                }
+
+                if ($request->file('image')) {
+                    $file = $request->file('image');
+                    $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                    $file->move(public_path('upload/photo'), $filename);
+                    $session->photo = '/upload/photo/' . $filename;
+                    $change = true;
+                }
+
+                if ($change) {
+                    $session->save();
+                    $res['status'] = 1;
+                    $res['msg'] = 'Đã thay đổi tiết thành công';
+                } else {
+                    $res['msg'] = 'Không có gì thay đổi!';
+                }
+
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+
+        return App::response($res);
+    }
+
+    // hiển thị tiết
+    public function manage_session_show(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res();
+        $request_all = $request->all();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], [1, 2])) {
+                if (Validate::number($res, $request_all, 'session_id', 'Tiết')) {
+                    // tiến hành tạo :))
+                    $session = lsession::find($request_all['session_id']);
+                    if ($session) {
+                        if ($session->status) {
+                            $res['msg'] = 'Tiết đang hiển thị';
+                        } else {
+                            $session->status = 1;
+                            $session->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã mở thành công';
+                        }
+                    } else {
+                        $res['msg'] = 'Tiết không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+
+        return App::response($res);
+    }
+
+    // tắt hiển thị tiết
+    public function manage_session_off(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res();
+        $request_all = $request->all();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], [1, 2])) {
+                if (Validate::number($res, $request_all, 'session_id', 'Tiết')) {
+                    // tiến hành tạo :))
+                    $session = lsession::find($request_all['session_id']);
+                    if ($session) {
+                        if ($session->status == 1) {
+                            $session->status = 0;
+                            $session->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã tắt thành công';
+                        } else {
+                            $res['msg'] = 'Tiết đang tắt';
+                        }
+                    } else {
+                        $res['msg'] = 'Tiết không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+
+        return App::response($res);
+    }
+
+    // xoá tiết
+    public function manage_session_delete(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res();
+        $request_all = $request->all();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) {
+                if (Validate::number($res, $request_all, 'session_id', 'Lớp (khối)')) {
+                    // tiến hành tạo :))
+                    $session = lsession::find($request_all['session_id']);
+                    if ($session) {
+                        $session->delete();
+                        $res['status'] = 1;
+                        $res['msg'] = 'Đã tạo tiết thành công';
+                    } else {
+                        $res['msg'] = 'Tiết không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+
+        return App::response($res);
+    }
+
+    // upload powepoint
     public function manage_ppt_upload(Request $request) {
         $all_request = $request->all();
         $res = App::RES_FORM;
         if (Validate::number($res, $all_request, 'session_id', 'Tiết')) {
-            $session_info = lsession::find($all_request['session_id']);
-            if ($session_info) {
-                $res['msg'] = 'File upload không hợp lệ vui lòng gửi lại!';
-                if ($request->file('file')) {
-                    $file = $request->file('file');
+            if (App::auth($info['info_user'], 1)) {
+                $session = lsession::find($all_request['session_id']);
+                if ($session) {
+                    $res['msg'] = 'File upload không hợp lệ vui lòng gửi lại!';
+                    if ($request->file('file')) {
+                        $file = $request->file('file');
 
-                    // tạo thông tin của file tải lên
-                    $file_upload_info = [
-                        'idc' => (int)(microtime(1)*1000),
-                        'nameor' => $file->getClientOriginalName(),
-                        'status' => 0,
-                    ];
-                    $file_upload_info['name'] = $file_upload_info['idc'].'.'.pathinfo($file_upload_info['nameor'], PATHINFO_EXTENSION);
-                    $file->move(public_path('upload/ppt'), $file_upload_info['name']);
+                        // tạo thông tin của file tải lên
+                        $file_upload_info = [
+                            'idc' => (int)(microtime(1)*1000),
+                            'nameor' => $file->getClientOriginalName(),
+                            'status' => 0,
+                        ];
+                        $file_upload_info['name'] = $file_upload_info['idc'].'.'.pathinfo($file_upload_info['nameor'], PATHINFO_EXTENSION);
+                        $file->move(public_path('upload/ppt'), $file_upload_info['name']);
 
-                    // kiểm tra xem file đã có chưa
-                    $path_file_info = "/ppt/info/{$session_info->id}.json";
-                    if ($session_info->ppttype) {
-                        $ppt_info = json_decode(Storage::get($path_file_info), 1);
+                        // kiểm tra xem file đã có chưa
+                        $path_file_info = "/ppt/info/{$session->id}.json";
+                        if ($session->ppttype) {
+                            $ppt_info = json_decode(Storage::get($path_file_info), 1);
 
-                        // xóa file ppt cũ
-                        $file_ppt = public_path('upload/ppt').'/'.$ppt_info['name'];
-                        if (is_file($file_ppt)) {
-                            unlink($file_ppt);
+                            // xóa file ppt cũ
+                            $file_ppt = public_path('upload/ppt').'/'.$ppt_info['name'];
+                            if (is_file($file_ppt)) {
+                                unlink($file_ppt);
+                            }
+
+                            // xóa folder ppt nếu đã process xong
+                            $folder_ppt = public_path('ppt').'/'.$ppt_info['idc'];
+                            if (is_dir($folder_ppt)) {
+                                App::deleteDir($folder_ppt);
+                            }
+                        } else {
+                            // cập nhật thông tin ppt
+                            $session->ppttype = 1;
+                            $session->save();
                         }
 
-                        // xóa folder ppt nếu đã process xong
-                        $folder_ppt = public_path('ppt').'/'.$ppt_info['idc'];
-                        if (is_dir($folder_ppt)) {
-                            App::deleteDir($folder_ppt);
-                        }
-                    } else {
-                        // cập nhật thông tin ppt
-                        $session_info->ppttype = 1;
-                        $session_info->save();
+                        // lưu lại thông tin file
+                        Storage::put($path_file_info, json_encode($file_upload_info));
+
+                        $res['status'] = 1;
+                        $res['msg'] = 'Tải lên thành công';
                     }
-
-                    // lưu lại thông tin file
-                    Storage::put($path_file_info, json_encode($file_upload_info));
-
-                    $res['status'] = 1;
-                    $res['msg'] = 'Tải lên thành công';
+                } else {
+                    $res['msg'] = "Tiết Không tồn tại hoặc đẵ bị xóa vui lòng thử lại";
                 }
             } else {
-                $res['msg'] = "Tiết Không tồn tại hoặc đẵ bị xóa vui lòng thử lại";
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
             }
         }
         return $res;
     }
 
+    public function manage_ppt_delete(Request $request) {
+        $all_request = $request->all();
+        $res = App::RES_FORM;
+        if (Validate::number($res, $all_request, 'session_id', 'Tiết')) {
+            if (App::auth($info['info_user'], 1)) {
+                $session = lsession::find($all_request['session_id']);
+                if ($session) {
+                    $path_file_info = "/ppt/info/{$session->id}.json";
+                    if ($session->ppttype) {
+                        $data = Storage::get($path_file_info);
+                        if ($data) {
+                            $ppt_info = json_decode($data, 1);
+
+                            // xóa file ppt cũ
+                            $file_ppt = public_path('upload/ppt').'/'.$ppt_info['name'];
+                            if (is_file($file_ppt)) {
+                                unlink($file_ppt);
+                            }
+
+                            // xóa folder ppt nếu đã process xong
+                            $folder_ppt = public_path('ppt').'/'.$ppt_info['idc'];
+                            if (is_dir($folder_ppt)) {
+                                App::deleteDir($folder_ppt);
+                            }
+                            Storage::delete($path_file_info);
+                        }
+                        $session->ppttype = 0;
+                        $session->save();
+                        $res['status'] = 1;
+                        $res['msg'] = 'Đã xóa thành công';
+                    } else {
+                        $res['msg'] = 'Tiết chưa có giáo án điện tử!';
+                    }
+                } else {
+                    $res['msg'] = "Tiết Không tồn tại hoặc đẵ bị xóa vui lòng thử lại";
+                }
+            } else {
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        }
+        return $res;
+    }
+
+    // upload pdf
     public function manage_pdf_upload(Request $request) {
         $all_request = $request->all();
         $res = App::RES_FORM;
         if (Validate::number($res, $all_request, 'session_id', 'Tiết')) {
-            $session_info = lsession::find($all_request['session_id']);
-            if ($session_info) {
-                $res['msg'] = 'File upload không hợp lệ vui lòng gửi lại!';
-                if ($request->file('file')) {
-                    $file = $request->file('file');
+            if (App::auth($info['info_user'], 1)) {
+            $session = lsession::find($all_request['session_id']);
+                if ($session) {
+                    $res['msg'] = 'File upload không hợp lệ vui lòng gửi lại!';
+                    if ($request->file('file')) {
+                        $file = $request->file('file');
 
-                    // tạo thông tin của file tải lên
-                    $file_upload_info = [
-                        'idc' => (int)(microtime(1)*1000),
-                        'nameor' => $file->getClientOriginalName(),
-                        'status' => 0,
-                    ];
-                    $file_upload_info['name'] = $file_upload_info['idc'].'.'.pathinfo($file_upload_info['nameor'], PATHINFO_EXTENSION);
-                    $file->move(public_path('upload/pdf'), $file_upload_info['name']);
+                        // tạo thông tin của file tải lên
+                        $file_upload_info = [
+                            'idc' => (int)(microtime(1)*1000),
+                            'nameor' => $file->getClientOriginalName(),
+                            'status' => 0,
+                        ];
+                        $file_upload_info['name'] = $file_upload_info['idc'].'.'.pathinfo($file_upload_info['nameor'], PATHINFO_EXTENSION);
+                        $file->move(public_path('upload/pdf'), $file_upload_info['name']);
 
-                    // kiểm tra xem file đã có chưa
-                    $path_file_info = "/pdf/info/{$session_info->id}.json";
-                    if ($session_info->doctype) {
+                        // kiểm tra xem file đã có chưa
+                        $path_file_info = "/pdf/info/{$session->id}.json";
+                        if ($session->doctype) {
+                            $data = Storage::get($path_file_info);
+                            if ($data) {
+                                $pdf_info = json_decode($data, 1);
+
+                                // xóa file pdf cũ
+                                $file_pdf = public_path('upload/pdf').'/'.$pdf_info['name'];
+                                if (is_file($file_pdf)) {
+                                    unlink($file_pdf);
+                                }
+
+                                // xóa folder pdf nếu đã process xong
+                                $folder_pdf = public_path('pdf').'/'.$pdf_info['idc'];
+                                if (is_dir($folder_pdf)) {
+                                    App::deleteDir($folder_pdf);
+                                }
+                            }
+                        } else {
+                            // cập nhật thông tin df
+                            $session->doctype = 1;
+                            $session->save();
+                        }
+
+                        // lưu lại thông tin file
+                        Storage::put($path_file_info, json_encode($file_upload_info));
+
+                        // chuyển pdf thành ảnh
+                        Pdf::dispatch($file_upload_info['idc'], $file_upload_info['name'], $path_file_info);
+
+                        $res['status'] = 1;
+                        $res['msg'] = 'Tải lên thành công';
+                    }
+                } else {
+                    $res['msg'] = "Tiết Không tồn tại hoặc đẵ bị xóa vui lòng thử lại";
+                }
+            } else {
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        }
+        return $res;
+    }
+
+    // delete pdf
+    public function manage_pdf_delete(Request $request) {
+        $all_request = $request->all();
+        $res = App::RES_FORM;
+        if (Validate::number($res, $all_request, 'session_id', 'Tiết')) {
+            if (App::auth($info['info_user'], 1)) {
+                $session = lsession::find($all_request['session_id']);
+                if ($session) {
+                    if ((int)$session->doctype) {
+                        // tiến hành xóa tài liệu
+                        $path_file_info = "/pdf/info/{$session->id}.json";
                         $data = Storage::get($path_file_info);
                         if ($data) {
                             $pdf_info = json_decode($data, 1);
@@ -457,29 +818,22 @@ class Home extends Controller
                             // xóa folder pdf nếu đã process xong
                             $folder_pdf = public_path('pdf').'/'.$pdf_info['idc'];
                             if (is_dir($folder_pdf)) {
-                                foreach (File::allFiles($folder_pdf) as $file) {
-                                    unlink($file);
-                                }
-                                rmdir($folder_pdf);
+                                App::deleteDir($folder_pdf);
                             }
+                            Storage::delete($path_file_info);
                         }
+                        $session->doctype = 0;
+                        $session->save();
+                        $res['status'] = 1;
+                        $res['msg'] = 'Đã xóa thành công';
                     } else {
-                        // cập nhật thông tin df
-                        $session_info->doctype = 1;
-                        $session_info->save();
+                        $res['msg'] = 'Tiết chưa có giáo án!';
                     }
-
-                    // lưu lại thông tin file
-                    Storage::put($path_file_info, json_encode($file_upload_info));
-
-                    // chuyển pdf thành ảnh
-                    Pdf::dispatch($file_upload_info['idc'], $file_upload_info['name'], $path_file_info);
-
-                    $res['status'] = 1;
-                    $res['msg'] = 'Tải lên thành công';
+                } else {
+                    $res['msg'] = 'Tiết không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                 }
             } else {
-                $res['msg'] = "Tiết Không tồn tại hoặc đẵ bị xóa vui lòng thử lại";
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
             }
         }
         return $res;

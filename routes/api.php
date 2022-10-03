@@ -55,23 +55,47 @@ Route::post('/course', [ControllersApiV1Home::class, 'course']);
 // lấy danh sách khóa học với trang thái quản trị viên
 Route::post('/manage/course', [ControllersApiV1Home::class, 'manage_course']);
 
-// mở hiển thị
+// mở hiển thị lớp
 Route::post('/manage/course/show', [ControllersApiV1Home::class, 'manage_course_show']);
 
-// tắt hiển thị
+// tắt hiển thị lớp
 Route::post('/manage/course/off', [ControllersApiV1Home::class, 'manage_course_off']);
 
 // tạo lớp | khối mới
 Route::post('/manage/course/create', [ControllersApiV1Home::class, 'manage_course_create']);
 
+// sửa lớp | khối
+Route::post('/manage/course/edit', [ControllersApiV1Home::class, 'manage_course_edit']);
+
 // xóa lớp
 Route::post('/manage/course/delete', [ControllersApiV1Home::class, 'manage_course_delete']);
+
+// tạo tiết mới
+Route::post('/manage/session/create', [ControllersApiV1Home::class, 'manage_session_create']);
+
+// sửa tiết
+Route::post('/manage/session/edit', [ControllersApiV1Home::class, 'manage_session_edit']);
+
+// mở hiển thị tiết
+Route::post('/manage/session/show', [ControllersApiV1Home::class, 'manage_session_show']);
+
+// tắt hiển thị tiết
+Route::post('/manage/session/off', [ControllersApiV1Home::class, 'manage_session_off']);
+
+// xóa tiết
+Route::post('/manage/session/delete', [ControllersApiV1Home::class, 'manage_session_delete']);
 
 // upload file ppt
 Route::post('/manage/ppt/upload', [ControllersApiV1Home::class, 'manage_ppt_upload']);
 
+// delete file ppt
+Route::post('/manage/ppt/delete', [ControllersApiV1Home::class, 'manage_ppt_delete']);
+
 // upload file pdf
 Route::post('/manage/pdf/upload', [ControllersApiV1Home::class, 'manage_pdf_upload']);
+
+// delete file pdf
+Route::post('/manage/pdf/delete', [ControllersApiV1Home::class, 'manage_pdf_delete']);
 
 // đây là thông tin của pdf view
 Route::post('/loguseractivity/create-many-async',  [ControllersApiV1Home::class, 'loguseractivity']);
