@@ -239,8 +239,8 @@ class Home extends Controller
 
     // tạo Khối (lớp) mới yêu cầu quyền admin
     public function manage_course_create(Request $request) {
-        $info = App::CheckLogin($request);
         $res = App::Res();
+        $info = App::CheckLogin($request);
 
         if ($info['status']) {
             if (App::auth($info['info_user'], 1)) {
@@ -337,13 +337,13 @@ class Home extends Controller
 
     // tắt hiển thị lớp
     public function manage_course_off(Request $request) {
-        $info = App::CheckLogin($request);
         $res = App::Res();
         $request_all = $request->all();
 
-        if ($info['status']) {
-            if (App::auth($info['info_user'], [1, 2])) {
-                if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
+        if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], [1, 2])) {
                     // tiến hành tạo :))
                     $course = lcourse::find($request_all['course_id']);
                     if ($course) {
@@ -358,14 +358,14 @@ class Home extends Controller
                     } else {
                         $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
                 }
             } else {
-                // không có quyền vô
-                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
             }
-        } else {
-            $res['msg'] = 'Vui lòng đăng nhập!';
-            $res['check_login'] = 1;
         }
 
         return App::response($res);
@@ -373,13 +373,13 @@ class Home extends Controller
 
     // hiển thị lớp
     public function manage_course_show(Request $request) {
-        $info = App::CheckLogin($request);
         $res = App::Res();
         $request_all = $request->all();
 
-        if ($info['status']) {
-            if (App::auth($info['info_user'], [1, 2])) {
-                if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
+        if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], [1, 2])) {
                     // tiến hành tạo :))
                     $course = lcourse::find($request_all['course_id']);
                     if ($course) {
@@ -394,14 +394,14 @@ class Home extends Controller
                     } else {
                         $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
                 }
             } else {
-                // không có quyền vô
-                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
             }
-        } else {
-            $res['msg'] = 'Vui lòng đăng nhập!';
-            $res['check_login'] = 1;
         }
 
         return App::response($res);
@@ -409,13 +409,14 @@ class Home extends Controller
 
     // xoá khối (lớp)
     public function manage_course_delete(Request $request) {
-        $info = App::CheckLogin($request);
         $res = App::Res();
         $request_all = $request->all();
 
-        if ($info['status']) {
-            if (App::auth($info['info_user'], 1)) {
-                if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
+        if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+
                     // tiến hành tạo :))
                     $course = lcourse::find($request_all['course_id']);
                     if ($course) {
@@ -425,14 +426,14 @@ class Home extends Controller
                     } else {
                         $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
                 }
             } else {
-                // không có quyền vô
-                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
             }
-        } else {
-            $res['msg'] = 'Vui lòng đăng nhập!';
-            $res['check_login'] = 1;
         }
 
         return App::response($res);
@@ -440,40 +441,48 @@ class Home extends Controller
 
     // tạo tiết mới yêu cầu quyền admin
     public function manage_session_create(Request $request) {
-        $info = App::CheckLogin($request);
         $res = App::Res();
 
-        if ($info['status']) {
-            if (App::auth($info['info_user'], 1)) {
-                if (Validate::name($res, $request->all(), 'name', 'Tên tiết')) {
-                    // tiến hành tạo :))
-                    $session = new lsession;
-                    $session->name = $request->name;
-                    $session->slug = Str::slug($request->name, '-');
-                    if (!empty($request->description)) {
-                        $session->description = $request->description;
-                    }
+        if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
+            $info = App::CheckLogin($request);
 
-                    if ($request->file('image')) {
-                        $file = $request->file('image');
-                        $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-                        $file->move(public_path('upload/photo'), $filename);
-                        $session->photo = '/upload/photo/' . $filename;
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    $course = lcourse::find($request_all['course_id']);
+                    if ($course) {
+                        if (Validate::name($res, $request->all(), 'name', 'Tên tiết')) {
+                            // tiến hành tạo :))
+                            $session = new lsession;
+                            $session->name = $request->name;
+                            $session->slug = Str::slug($request->name, '-');
+                            if (!empty($request->description)) {
+                                $session->description = $request->description;
+                            }
+
+                            if ($request->file('image')) {
+                                $file = $request->file('image');
+                                $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                                $file->move(public_path('upload/photo'), $filename);
+                                $session->photo = '/upload/photo/' . $filename;
+                            } else {
+                                $imgs = config('app.photo');
+                                $session->photo = $imgs[rand(0, count($imgs)-1)];
+                            }
+                            $session->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã tạo tiết thành công';
+                        }
                     } else {
-                        $imgs = config('app.photo');
-                        $session->photo = $imgs[rand(0, count($imgs)-1)];
+                        $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
-                    $session->save();
-                    $res['status'] = 1;
-                    $res['msg'] = 'Đã tạo tiết thành công';
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
                 }
             } else {
-                // không có quyền vô
-                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
             }
-        } else {
-            $res['msg'] = 'Vui lòng đăng nhập!';
-            $res['check_login'] = 1;
         }
 
         return App::response($res);
@@ -538,13 +547,13 @@ class Home extends Controller
 
     // hiển thị tiết
     public function manage_session_show(Request $request) {
-        $info = App::CheckLogin($request);
         $res = App::Res();
         $request_all = $request->all();
 
-        if ($info['status']) {
-            if (App::auth($info['info_user'], [1, 2])) {
-                if (Validate::number($res, $request_all, 'session_id', 'Tiết')) {
+        if (Validate::number($res, $request_all, 'session_id', 'Tiết')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], [1, 2])) {
                     // tiến hành tạo :))
                     $session = lsession::find($request_all['session_id']);
                     if ($session) {
@@ -559,14 +568,14 @@ class Home extends Controller
                     } else {
                         $res['msg'] = 'Tiết không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
                 }
             } else {
-                // không có quyền vô
-                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
             }
-        } else {
-            $res['msg'] = 'Vui lòng đăng nhập!';
-            $res['check_login'] = 1;
         }
 
         return App::response($res);
@@ -574,13 +583,13 @@ class Home extends Controller
 
     // tắt hiển thị tiết
     public function manage_session_off(Request $request) {
-        $info = App::CheckLogin($request);
         $res = App::Res();
         $request_all = $request->all();
 
-        if ($info['status']) {
-            if (App::auth($info['info_user'], [1, 2])) {
-                if (Validate::number($res, $request_all, 'session_id', 'Tiết')) {
+        if (Validate::number($res, $request_all, 'session_id', 'Tiết')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], [1, 2])) {
                     // tiến hành tạo :))
                     $session = lsession::find($request_all['session_id']);
                     if ($session) {
@@ -595,14 +604,14 @@ class Home extends Controller
                     } else {
                         $res['msg'] = 'Tiết không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
                 }
             } else {
-                // không có quyền vô
-                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
             }
-        } else {
-            $res['msg'] = 'Vui lòng đăng nhập!';
-            $res['check_login'] = 1;
         }
 
         return App::response($res);
@@ -610,13 +619,14 @@ class Home extends Controller
 
     // xoá tiết
     public function manage_session_delete(Request $request) {
-        $info = App::CheckLogin($request);
         $res = App::Res();
         $request_all = $request->all();
 
-        if ($info['status']) {
-            if (App::auth($info['info_user'], 1)) {
-                if (Validate::number($res, $request_all, 'session_id', 'Lớp (khối)')) {
+        if (Validate::number($res, $request_all, 'session_id', 'Tiết')) {
+            $info = App::CheckLogin($request);
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
                     // tiến hành tạo :))
                     $session = lsession::find($request_all['session_id']);
                     if ($session) {
@@ -626,14 +636,14 @@ class Home extends Controller
                     } else {
                         $res['msg'] = 'Tiết không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
                 }
             } else {
-                // không có quyền vô
-                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
             }
-        } else {
-            $res['msg'] = 'Vui lòng đăng nhập!';
-            $res['check_login'] = 1;
         }
 
         return App::response($res);
@@ -641,9 +651,10 @@ class Home extends Controller
 
     // upload powepoint
     public function manage_ppt_upload(Request $request) {
-        $all_request = $request->all();
         $res = App::RES_FORM;
+        $all_request = $request->all();
         if (Validate::number($res, $all_request, 'session_id', 'Tiết')) {
+            $info = App::CheckLogin($request);
             if (App::auth($info['info_user'], 1)) {
                 $session = lsession::find($all_request['session_id']);
                 if ($session) {
@@ -699,9 +710,10 @@ class Home extends Controller
     }
 
     public function manage_ppt_delete(Request $request) {
-        $all_request = $request->all();
         $res = App::RES_FORM;
+        $all_request = $request->all();
         if (Validate::number($res, $all_request, 'session_id', 'Tiết')) {
+            $info = App::CheckLogin($request);
             if (App::auth($info['info_user'], 1)) {
                 $session = lsession::find($all_request['session_id']);
                 if ($session) {
@@ -743,9 +755,10 @@ class Home extends Controller
 
     // upload pdf
     public function manage_pdf_upload(Request $request) {
-        $all_request = $request->all();
         $res = App::RES_FORM;
+        $all_request = $request->all();
         if (Validate::number($res, $all_request, 'session_id', 'Tiết')) {
+            $info = App::CheckLogin($request);
             if (App::auth($info['info_user'], 1)) {
             $session = lsession::find($all_request['session_id']);
                 if ($session) {
@@ -808,9 +821,10 @@ class Home extends Controller
 
     // delete pdf
     public function manage_pdf_delete(Request $request) {
-        $all_request = $request->all();
         $res = App::RES_FORM;
+        $all_request = $request->all();
         if (Validate::number($res, $all_request, 'session_id', 'Tiết')) {
+            $info = App::CheckLogin($request);
             if (App::auth($info['info_user'], 1)) {
                 $session = lsession::find($all_request['session_id']);
                 if ($session) {
