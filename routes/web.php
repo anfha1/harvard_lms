@@ -3,48 +3,27 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
-use App\Http\Middleware\UserNoLogin as UserNoLoginMiddelware;
-use App\Http\Middleware\UserLogin as UserLoginMiddelware;
-use App\Http\Middleware\UserManager as UserManagerMiddelware;
-use App\Http\Middleware\UserAdmin as UserAdminMiddelware;
+// use App\Http\Middleware\UserNoLogin as UserNoLoginMiddelware;
+// use App\Http\Middleware\UserLogin as UserLoginMiddelware;
+// use App\Http\Middleware\UserManager as UserManagerMiddelware;
+// use App\Http\Middleware\UserAdmin as UserAdminMiddelware;
 
 # api
-use App\Http\Controllers\Api\Home as ControllersApiHome;
-use App\Http\Controllers\Api\Manage\User as ControllersApiManageUser;
-use App\Http\Controllers\Api\Manage\Course as ControllersApiManageCourse;
-use App\Http\Controllers\Api\Manage\Blog as ControllersApiManageBlog;
-use App\Http\Controllers\Api\Manage\Session as ControllersApiManageSession;
-use App\Http\Controllers\Api\Manage\Role as ControllersApiManageRole;
+// use App\Http\Controllers\Api\Home as ControllersApiHome;
+// use App\Http\Controllers\Api\Manage\User as ControllersApiManageUser;
+// use App\Http\Controllers\Api\Manage\Course as ControllersApiManageCourse;
+// use App\Http\Controllers\Api\Manage\Blog as ControllersApiManageBlog;
+// use App\Http\Controllers\Api\Manage\Session as ControllersApiManageSession;
+// use App\Http\Controllers\Api\Manage\Role as ControllersApiManageRole;
 
 # Views
-use App\Http\Controllers\View\Home as ControllersViewHome;
-use App\Http\Controllers\View\Manage as ControllersViewManage;
-use App\Http\Controllers\View\Ppt as ControllersViewPpt;
-use App\Http\Controllers\View\Pdf as ControllersViewPdf;
-use App\Http\Controllers\View\Doc as ControllersViewDoc;
-use App\Http\Controllers\View\Blog as ControllersViewBlog;
-use App\Http\Controllers\View\Manage\User as ControllersViewManageUser;
-use App\Http\Controllers\View\Manage\Course as ControllersViewManageCourse;
-use App\Http\Controllers\View\Manage\Blog as ControllersViewManageBlog;
-use App\Http\Controllers\View\Manage\Session as ControllersViewManageSession;
-
-Route::get('/pdf/{id_session}', [ControllersViewPdf::class, 'view'])->where('id_session', '[0-9]+');
-Route::post('/Base/CheckLangCookie', function() {
-    return 'true';
-});
-Route::post('/Banner/GetBannerAdvertisement', function() {
-    return view('other.baner');
-});
-
-// demo hiển thị powerpoint
-Route::get('/ppt/{id_ppt}/{id_session}', [ControllersViewPpt::class, 'view'])->name('ppt.view')->where('id_ppt', '[0-9]+')->where('id_session', '[0-9]+');
-
-// hiển thị document
-Route::get('/document/{id_session}', [ControllersViewDoc::class, 'view'])->name('doc.view')->where('id_session', '[0-9]+');
-
-Route::any('{any?}', function() {
-    return view('pages.vue');
-})->where('any', '.*');
+// use App\Http\Controllers\View\Home as ControllersViewHome;
+// use App\Http\Controllers\View\Manage as ControllersViewManage;
+// use App\Http\Controllers\View\Blog as ControllersViewBlog;
+// use App\Http\Controllers\View\Manage\User as ControllersViewManageUser;
+// use App\Http\Controllers\View\Manage\Course as ControllersViewManageCourse;
+// use App\Http\Controllers\View\Manage\Blog as ControllersViewManageBlog;
+// use App\Http\Controllers\View\Manage\Session as ControllersViewManageSession;
 
 // // hiển thị blog
 // Route::get('/blog/{id_blog}', [ControllersViewBlog::class, 'view'])->name('blog.view')->where('id_blog', '[0-9]+');

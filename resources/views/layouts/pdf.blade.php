@@ -224,156 +224,15 @@
                 <img id="imgPrevious" class="pre-next hidden" src="/Content/images/Amanda/ic-circle-next.png" style="z-index:100;left:-20px;top:75%;" />
                 <img id="imgNext" data-idtheme="1093" class="pre-next" src="/Content/images/Amanda/ic-circle-next.png" style="transform: rotate(180deg);z-index:100;right:-20px;top:75%;" />
             </div>
-            <div class="modal fade" id="show-book-package-dialog" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="false" style="padding-left:0px">
-                <div class="modal-dialog" role="document" style="width:63%;display: flex;align-items: center;justify-content: center;">
-                    <div class="modal-content" style="border-radius: 25px !important; height: 500px; background-color: #BBFAFF; overflow: hidden;">
-                        <div class="item-background">
-                            <img style="height: auto;width:100%; " src="/Content/images/Diglog_SignUp/item.png" />
-                        </div>
-                        <div class="item-tree-background-1">
-                            <img style="height: auto;width:100%; " src="/Content/images/Diglog_SignUp/tree1.png" />
-                        </div>
-                        <div class="item-star-background">
-                            <img style="height: auto;width:100%; " src="/Content/images/Diglog_SignUp/star.png" />
-                        </div>
-
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white; opacity: 1; font-size: 4vw; position: absolute; right: 13px; top: -1%;">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <div class="dialog-content-1">
-                            <div style="width:100%; height: 47%; display: flex; justify-content: center; align-items: center;margin-bottom:3% ">
-                                <div class="text-slogan" style="width: 445px; z-index: 2;">
-                                    <span>Chào mừng đến</span>
-                                </div>
-                                <div class="logo-welcome" style="width: 19%; z-index: 2;">
-                                    <img style="height: auto;width:100%; " src="/Content/images/logoFooter.png" />
-                                </div>
-                            </div>
-                            <div class="text-slogan-welcome" style="z-index: 2; width: 65%; text-align: center; font-family: Montserrat-Regular;">
-                                <span class="text-slogan-detail">
-                                    H&#227;y đăng nhập t&#224;i khoản của bạn để c&#243; thể truy cập sản phẩm của ch&#250;ng t&#244;i. Tăng cường v&#224; hỗ trợ cho việc học tập của bạn!
-                                </span>
-                            </div>
-                        </div>
-                        <div class="dialog-content-2">
-                            <div class="item-tree-background-2">
-                                <img style="height: auto;width:100%; " src="/Content/images/Diglog_SignUp/tree2.png" />
-                            </div>
-                            <div style="background-color: white; border-radius: 50% 50% 0 0/33% 33% 0 0; width: 115%; height: 49%; box-shadow: 0px -1px 3px 1px #cccc;"> </div>
-                            <div class="class-login-form"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal fade" id="dialog-price-package" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="false" style="padding-left:0px">
-                <div class="modal-dialog" role="document" style="display: flex; justify-content: center; align-items: center; width: 40%;">
-                    <div class="modal-content" style="border-radius: 13px !important; overflow: hidden; padding: 5% 0; width: 100%; display: flex; position: relative; flex-direction: column;background: url(/Content/images/DialogPricePackage/dialog-bg.png) no-repeat center center;background-size: cover;">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="width: 23px; position: absolute; right: 9px; top: 10px;opacity:1">
-                            <img src="/Content/images/DialogPricePackage/ic-close.png" data-dismiss="modal" style="height: auto; width: 100%;" />
-                        </button>
-                        <div style="width:100%; display:flex;justify-content:center;align-content:center;">
-                            <div style="width:47%;text-align: center;">
-                                <img src="/Content/images/DialogPricePackage/text.png" style="width:100%;height:auto" />
-                            </div>
-                        </div>
-                        <div style="padding: 0 7%; text-align: justify; font-size: 15px; color: white; margin: 2% 0 4% 0;">
-                            <span style="font-family: 'MONTSERRAT-BOLDITALIC';">Mua ngay </span><span>ứng dụng để được nhận thêm nhiều ưu đãi hấp dẫn cùng với các chương trình khuyến mãi đặc sắc. Hỗ trợ tối đa cho việc học tập và giảng dạy của bạn.</span>
-                        </div>
-                        <div id="dialog-price-package-content" style=" display: flex; flex-direction: column; align-items: center;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal fade" id="modal_CheckCode" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content" id="modalContent">
-                        <div class="modal-header">
-                            <div>
-                                <h3 class="modal-title" id="exampleModalLabel">PACKAGE CODE INPUT</h3>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="modal-body">
-
-                        </div>
-                        <div class="modal-footer">
-                            <button id="continueBtn" class="btn btn-primary">Tiếp tục</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 1054;">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content" id="modalContent">
-                        <div class="modal-header">
-                            <div>
-                                <h3 class="modal-title" id="exampleModalLabel">Qu&#234;n mật khẩu</h3>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="modal-body">
-                            <div>
-                                <span id="status">Vui l&#242;ng nhập số điện thoại của bạn để đặt lại mật khẩu!</span>
-                                <div class="input-group" id="phoneInput">
-                                    <span class="input-group-addon" id="basic-addon1">
-                                        <img src="/Content/images/ResetPassword/PhoneIcon.png" style="width: 20px;" />
-                                    </span>
-                                    <input class="form-control" id="inputPhoneNumber" type="text" name="phoneNumber" value="" placeholder="Vui l&#242;ng nhập số điện thoại của bạn!" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button id="continueBtn" onclick="Common.Account.ForgotPassword()" class="btn btn-primary">Tiếp tục</button>
-                            <img src="/Content/images/ResetPassword/PleaseCallUs.png" id="pleaseCallUs" hidden />
-                            <img src="/Content/images/ResetPassword/sentPass.png" id="sentPass" hidden />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal fade" id="dialog-star-vote" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="false" style="padding-left:0px">
-                <div class="modal-dialog" role="document" style="width: 40%;" id="dialog_vote_star_content"></div>
-            </div>
-            <div class="modal fade" id="dialog-submit-star-vote-success" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="false" style="padding-left:0px">
-                <div class="modal-dialog" role="document" style="display: flex; justify-content: center; align-items: center; width: 40%;" id="dialog_vote_star_content">
-                    <div class="modal-content" style="border-radius: 13px !important;overflow: hidden;width: 100%;display: flex;position: relative;flex-direction: column;padding: 15px 0;">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="width: 27px;position: absolute;right: 9px;top: 10px;opacity: 1;padding: 6px;background-color: e6e6e6;border-radius: 8px;display: flex;justify-content: center;align-items: center;">
-                            <img src="/Content/images/DialogPricePackage/ic-close.png" data-dismiss="modal" style="height: auto; width: 100%;">
-                        </button>
-                        <div style="display: flex;justify-content: center;align-items: center;text-align: center;">
-                            <span style="font-size: 20px;color: #0e698a;font-family: 'MontserratMedium';">Đ&#225;nh gi&#225; th&#224;nh c&#244;ng</span>
-                        </div>
-                        <div style="width:100%; display:flex ;justify-content:center;align-items:center;flex-direction:column">
-                            <div id="submitRatingSuccess" style="position: relative;">
-                                <div id="save-success" class="fadein" style="width: 51px;position: absolute;top: 30%;left: 25%;">
-                                    <img src="/Content/images/StarVoting/ic-checkmark.png" style="width:100%;height:auto">
-                                </div>
-                            </div>
-                        </div>
-                        <div style="display: flex;justify-content: center;align-items: center;text-align: center;">
-                            <span style="font-size: 11px;color: #595959;font-family: 'MontserratMedium';width: 54%;">
-                                C&#225;m ơn bạn đ&#227; tin tưởng v&#224; sử dụng ứng dụng
-                                của tập đo&#224;n<span style="color: #0f4666"> Đại Trường Ph&#225;t</span>.
-                            </span>
-                        </div>
-                        <div style="display:flex;width: 100%;justify-content: center;margin-top: 15px;margin-bottom:5px">
-                            <div style="color: white;background-color: #009e0f;border: none;border-radius: 5px;padding: 1.5% 5%;white-space: nowrap;z-index: 1;font-size: 1.3vw;box-shadow: 0px 3px #005708;font-family: 'MontserratMedium';cursor:pointer;" data-dismiss="modal">OK</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div id="container" style="background-color: transparent; 	position: absolute; top:50%; left:50%; transform: translate(-50%,-50%);"></div>
 
             <div class="form_text" style="z-index:98"></div>
 
             <div class="class-top-content">
-                <div class="class-img-menu-top">
+                <a href="/" class="class-img-menu-top">
                     <img class="img-menu" style="height:70%;margin-bottom:6px;" src="/Content/images/Amanda/logo.png" />
-                </div>
+                </a>
                 <span class="brick"></span>
                 <div class="class-img-menu-top" id="idOnClickReadingMode" onclick="OnClickReadingMode()">
                     <img class="img-menu" src="/Content/images/Amanda/ic-one-page.png" />
@@ -792,22 +651,6 @@
                 <img src="/Content/images/AVS/icon-avs.png" style="width:100%;height:auto;" />
             </div>
         </content>
-
-        <!-- Modal -->
-        <div class="modal fade modal-alert" id="modal-alert" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="false">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Đ&#243;ng</span></button>
-                        <h4 class="modal-title" id="myModalLabel">Th&#244;ng b&#225;o</h4>
-                    </div>
-                    <div class="modal-body"></div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default btn-cons btn-sm close-modal btn-close" data-dismiss="modal">Đ&#243;ng</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <link href="/Content/Avs/styles.css" rel="stylesheet"/>
         <script>
