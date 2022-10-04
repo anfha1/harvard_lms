@@ -1,1 +1,0 @@
-import{L as e}from"./Basic.cbf65d24.js";import{d as t,c as o,w as a,o as s,g as n}from"./index.07f8152c.js";const r=n("h3",null,"Qu\u1EA3n l\xFD t\xE0i kho\u1EA3n",-1),p=t({__name:"User",setup(c){return(u,_)=>(s(),o(e,null,{default:a(()=>[r]),_:1}))}});export{p as default};
