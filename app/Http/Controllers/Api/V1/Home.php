@@ -280,50 +280,56 @@ class Home extends Controller
 
     // sửa Khối (lớp) yêu cầu quyền admin
     public function manage_course_edit(Request $request) {
-        $info = App::CheckLogin($request);
+        $request_all = $request->all();
         $res = App::Res();
 
-        if ($info['status']) {
-            if (App::auth($info['info_user'], 1)) {
-                $change = false;
-                if (!empty($request->name) && $request->name != $course->name) {
-                    if (Validate::name($res, $request->all(), 'name', 'Tên lớp')) {
-                        // tiến hành tạo :))
-                        $course = new lcourse;
-                        $course->name = $request->name;
-                        $course->slug = Str::slug($request->name, '-');
-                        $change = true;
+        if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    $course = lcourse::find($request_all['course_id']);
+                    if ($course) {
+                        $change = false;
+                        if (!empty($request->name) && $request->name != $course->name) {
+                            if (Validate::name($res, $request->all(), 'name', 'Tên lớp')) {
+                                // tiến hành tạo :))
+                                $course->name = $request->name;
+                                $course->slug = Str::slug($request->name, '-');
+                                $change = true;
+                            }
+                        }
+
+                        if (!empty($request->description) && $request->description != $course->description) {
+                            $course->description = $request->description;
+                            $change = true;
+                        }
+
+                        if ($request->file('image')) {
+                            $file = $request->file('image');
+                            $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                            $file->move(public_path('upload/photo'), $filename);
+                            $course->photo = '/upload/photo/' . $filename;
+                            $change = true;
+                        }
+
+                        if ($change) {
+                            $course->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã sửa lớp thành công';
+                        } else {
+                            $res['msg'] = 'Không có gì thay đổi!';
+                        }
+                    } else {
+                        $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
-                }
-
-                if (!empty($request->description) && $request->description != $course->description) {
-                    $course->description = $request->description;
-                    $change = true;
-                }
-
-                if ($request->file('image')) {
-                    $file = $request->file('image');
-                    $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-                    $file->move(public_path('upload/photo'), $filename);
-                    $course->photo = '/upload/photo/' . $filename;
-                    $change = true;
-                }
-
-                if ($change) {
-                    $course->save();
-                    $res['status'] = 1;
-                    $res['msg'] = 'Đã sửa lớp thành công';
                 } else {
-                    $res['msg'] = 'Không có gì thay đổi!';
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
                 }
-
             } else {
-                // không có quyền vô
-                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
             }
-        } else {
-            $res['msg'] = 'Vui lòng đăng nhập!';
-            $res['check_login'] = 1;
         }
 
         return App::response($res);
@@ -475,50 +481,56 @@ class Home extends Controller
 
     // sửa tiết yêu cầu quyền admin
     public function manage_session_edit(Request $request) {
-        $info = App::CheckLogin($request);
+        $request_all = $request->all();
         $res = App::Res();
 
-        if ($info['status']) {
-            if (App::auth($info['info_user'], 1)) {
-                $change = false;
-                if (!empty($request->name) && $request->name != $session->name) {
-                    if (Validate::name($res, $request->all(), 'name', 'Tên tiết')) {
-                        // tiến hành tạo :))
-                        $session = new lsession;
-                        $session->name = $request->name;
-                        $session->slug = Str::slug($request->name, '-');
-                        $change = true;
+        if (Validate::number($res, $request_all, 'session_id', 'Tiết')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    $session = lsession::find($request_all['session_id']);
+                    if ($session) {
+                        $change = false;
+                        if (!empty($request->name) && $request->name != $session->name) {
+                            if (Validate::name($res, $request->all(), 'name', 'Tên tiết')) {
+                                // tiến hành tạo :))
+                                $session->name = $request->name;
+                                $session->slug = Str::slug($request->name, '-');
+                                $change = true;
+                            }
+                        }
+
+                        if (!empty($request->description) && $request->description != $session->description) {
+                            $session->description = $request->description;
+                            $change = true;
+                        }
+
+                        if ($request->file('image')) {
+                            $file = $request->file('image');
+                            $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                            $file->move(public_path('upload/photo'), $filename);
+                            $session->photo = '/upload/photo/' . $filename;
+                            $change = true;
+                        }
+
+                        if ($change) {
+                            $session->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã thay đổi tiết thành công';
+                        } else {
+                            $res['msg'] = 'Không có gì thay đổi!';
+                        }
+                    } else {
+                        $res['msg'] = 'Tiết không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
-                }
-
-                if (!empty($request->description) && $request->description != $session->description) {
-                    $session->description = $request->description;
-                    $change = true;
-                }
-
-                if ($request->file('image')) {
-                    $file = $request->file('image');
-                    $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-                    $file->move(public_path('upload/photo'), $filename);
-                    $session->photo = '/upload/photo/' . $filename;
-                    $change = true;
-                }
-
-                if ($change) {
-                    $session->save();
-                    $res['status'] = 1;
-                    $res['msg'] = 'Đã thay đổi tiết thành công';
                 } else {
-                    $res['msg'] = 'Không có gì thay đổi!';
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
                 }
-
             } else {
-                // không có quyền vô
-                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
             }
-        } else {
-            $res['msg'] = 'Vui lòng đăng nhập!';
-            $res['check_login'] = 1;
         }
 
         return App::response($res);
