@@ -53,6 +53,12 @@ Route::post('/blog', [ControllersApiV1Home::class, 'blog']);
 Route::post('/course', [ControllersApiV1Home::class, 'course']);
 
 // lấy danh sách khóa học với trang thái quản trị viên
+Route::post('/manage/user', [ControllersApiV1Home::class, 'manage_user']);
+
+// Tạo tài khoản mới
+Route::post('/manage/user/create', [ControllersApiV1Home::class, 'manage_user_create']);
+
+// lấy danh sách khóa học với trang thái quản trị viên
 Route::post('/manage/course', [ControllersApiV1Home::class, 'manage_course']);
 
 // mở hiển thị lớp

@@ -163,6 +163,88 @@ class Home extends Controller
         ]);
     }
 
+    // hiển thị danh sách user cho quản lý user
+    public function manage_user(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res([
+            'users' => [],
+        ]);
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], [1, 2])) {
+                $list_user = luser::all();
+                foreach ($list_user as $user) {
+                    $res['users'][] = [
+                        'id' => $user->id,
+                        'username' => $user->username,
+                        'avatar' => $user->photo,
+                        'name' => $user->name,
+                        'status' => $user->status,
+                        'role' => $user->role,
+                        'tags' => json_decode($user->tags),
+                    ];
+                }
+                $res['status'] = 1;
+            } else {
+                $res['msg'] = 'Bạn không có quyền truy cập!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+        return App::response($res);
+    }
+
+    // Thêm tài khoản
+    public function manage_user_create(Request $request) {
+        $res = App::Res();
+        $info = App::CheckLogin($request);
+        $request_all = $request->all();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) {
+                if (Validate::username($res, $request_all)) {
+                    if (Validate::password($res, $request_all)) {
+                        if (Validate::role($res, $request_all)) {
+                            if (Validate::name($res, $request_all, 'name', 'Tên hiển thị')) {
+                                // tiến hành tạo :))
+                                $luser = new luser;
+                                $luser->username = $request_all['username'];
+                                $luser->password = md5($request_all['password']);
+                                $luser->name = $request_all['name'];
+                                $luser->role = $request_all['role'];
+
+                                if ($request->file('avatar')) {
+                                    $file = $request->file('avatar');
+                                    $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                                    $file->move(public_path('upload/photo'), $filename);
+                                    $luser->photo = '/upload/photo/' . $filename;
+                                } else {
+                                    $user = Str::slug($request_all['name'], '-');
+                                    $luser->photo = "https://avatars.dicebear.com/api/adventurer-neutral/{$user}.svg";
+                                }
+
+                                $luser->tags = $request->tags ?? json_encode([]);
+                                $luser->save();
+
+                                $res['status'] = 1;
+                                $res['msg'] = 'Đã tạo tài khoản thành công';
+                            }
+                        }
+                    }
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+
+        return App::response($res);
+    }
+
     public function manage_course(Request $request) {
         // giả lập đăng nhập
         // $request->session()->put('id_user', 1);
@@ -173,62 +255,56 @@ class Home extends Controller
         ]);
 
         if ($info['status']) {
-            switch ((int)$info['info_user']->role) {
-                case 1:
-                case 2: {
-                    $list_course = [];
-                    foreach (lcourse::all() as $course) {
-                        $list_session = [];
-                        foreach ($course->session()->get() as $session) {
-                            $ppt_status = 0;
-                            $session_info = [
-                                'id' => $session->id,
-                                'name' => $session->name,
-                                'status' => $session->status,
-                                'photo' => $session->photo,
-                                'doc_type' => $session->doctype,
-                                'doc_info' => [],
-                                'ppt_type' => $session->ppttype,
-                                'ppt_info' => [],
-                            ];
-                            if ($session->ppttype == 1) {
-                                $data = Storage::get("/ppt/info/{$session->id}.json");
-                                if ($data) {
-                                    $info_ppt = json_decode($data, 1);
-                                    $session_info['ppt_info'] = [
-                                        'status' => $info_ppt['status'],
-                                        'name' => $info_ppt['nameor'],
-                                    ];
-                                }
-                            }
-                            if ($session->doctype == 1) {
-                                $data = Storage::get("/pdf/info/{$session->id}.json");
-                                if ($data) {
-                                    $info_ppt = json_decode($data, 1);
-                                    $session_info['doc_info'] = [
-                                        'status' => $info_ppt['status'],
-                                        'name' => $info_ppt['nameor'],
-                                    ];
-                                }
-                            }
-                            $list_session[] = $session_info;
-                        }
-                        $list_course[] = [
-                            'id' => $course->id,
-                            'name' => $course->name,
-                            'status' => $course->status,
-                            'sessions' => $list_session,
+            if (App::auth($info['info_user'], [1, 2])) {
+                $list_course = [];
+                foreach (lcourse::all() as $course) {
+                    $list_session = [];
+                    foreach ($course->session()->get() as $session) {
+                        $ppt_status = 0;
+                        $session_info = [
+                            'id' => $session->id,
+                            'name' => $session->name,
+                            'status' => $session->status,
+                            'photo' => $session->photo,
+                            'doc_type' => $session->doctype,
+                            'doc_info' => [],
+                            'ppt_type' => $session->ppttype,
+                            'ppt_info' => [],
                         ];
+                        if ($session->ppttype == 1) {
+                            $data = Storage::get("/ppt/info/{$session->id}.json");
+                            if ($data) {
+                                $info_ppt = json_decode($data, 1);
+                                $session_info['ppt_info'] = [
+                                    'status' => $info_ppt['status'],
+                                    'name' => $info_ppt['nameor'],
+                                ];
+                            }
+                        }
+                        if ($session->doctype == 1) {
+                            $data = Storage::get("/pdf/info/{$session->id}.json");
+                            if ($data) {
+                                $info_ppt = json_decode($data, 1);
+                                $session_info['doc_info'] = [
+                                    'status' => $info_ppt['status'],
+                                    'name' => $info_ppt['nameor'],
+                                ];
+                            }
+                        }
+                        $list_session[] = $session_info;
                     }
+                    $list_course[] = [
+                        'id' => $course->id,
+                        'name' => $course->name,
+                        'status' => $course->status,
+                        'sessions' => $list_session,
+                    ];
+                }
 
-                    $res['courses'] = $list_course;
-                    $res['status'] = 1;
-                    break;
-                }
-                default: {
-                    $res['msg'] = 'Bạn không có quyền truy cập!';
-                    break;
-                }
+                $res['courses'] = $list_course;
+                $res['status'] = 1;
+            } else {
+                $res['msg'] = 'Bạn không có quyền truy cập!';
             }
         } else {
             $res['msg'] = 'Vui lòng đăng nhập!';

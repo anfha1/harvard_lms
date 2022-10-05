@@ -641,7 +641,7 @@
                 </div>
             </div>
 
-            <form action="/Banner/GetBannerAdvertisement?_token={{ csrf_token() }}" data-ajax="true" data-ajax-begin="Common.BannerAdvertisement.BeforeSend" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-success="Common.BannerAdvertisement.SuccessForm" data-ajax-update="#banner-advertisement" id="form-search-BannerAdvertisement" method="post">
+            <form action="/Banner/GetBannerAdvertisement" data-ajax="true" data-ajax-begin="Common.BannerAdvertisement.BeforeSend" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-success="Common.BannerAdvertisement.SuccessForm" data-ajax-update="#banner-advertisement" id="form-search-BannerAdvertisement" method="post">
                 <div class="hidden">
                     <input id="IdApp" name="IdApp" type="hidden" value="1093" />
                 </div>
@@ -1195,15 +1195,15 @@
             $(document).ready(function () {
                 Common.ChangeLanguage = new ChangeLanguage();
                 ChangeLanguage.Url = {};
-                ChangeLanguage.Url.ChangeLanguage = '/Base/WriteLangCookie?_token={{ csrf_token() }}';
-                ChangeLanguage.Url.CheckLanguageCookie = '/Base/CheckLangCookie?_token={{ csrf_token() }}';
+                ChangeLanguage.Url.ChangeLanguage = '/Base/WriteLangCookie';
+                ChangeLanguage.Url.CheckLanguageCookie = '/Base/CheckLangCookie';
 
                 //location
                 Common.ChangeLanguage.CheckLanguageCookie();
                 Common.GiftNotification = new GiftNotification();
                 GiftNotification.Url = {};
-                GiftNotification.Url.CheckEventGift = '/GiftPackage/CheckEventGift?_token={{ csrf_token() }}';
-                GiftNotification.Url.ReceiveGiftPackage = '/GiftPackage/ReceiveGiftPackage?_token={{ csrf_token() }}';
+                GiftNotification.Url.CheckEventGift = '/GiftPackage/CheckEventGift';
+                GiftNotification.Url.ReceiveGiftPackage = '/GiftPackage/ReceiveGiftPackage';
 
                 Common.BannerAdvertisement = new BannerAdvertisement();
                 Common.LogUserActivity = new LogUserActivity();
