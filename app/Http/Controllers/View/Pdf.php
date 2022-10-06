@@ -21,6 +21,7 @@ class Pdf extends Controller {
                     if (isset($info_ppt['list']) && count($info_ppt['list']) > 0) {
                         return view('pages.pdf', [
                             'list_photo' => $info_ppt['list'],
+                            'name' => $session_info->name,
                         ]);
                     }
                 }
@@ -29,17 +30,5 @@ class Pdf extends Controller {
         } else {
             return 'Vui lòng đăng nhập!';
         }
-        // $session_info = lsession::find($id_session);
-        // if ($session_info) {
-        //     if ($session_info->doctype) {
-        //         $info_ppt = json_decode(Storage::get("/pdf/info/{$session_info->id}.json"), 1);
-        //         if (isset($info_ppt['list']) && count($info_ppt['list']) > 0) {
-        //             return view('pages.pdf', [
-        //                 'list_photo' => $info_ppt['list'],
-        //             ]);
-        //         }
-        //     }
-        // }
-        // return 'Tài liệu không tồn tại!';
     }
 }

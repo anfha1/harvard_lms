@@ -4,7 +4,7 @@
 
 @extends('layouts.pdf')
 
-@section('title', 'Test pdf')
+@section('title', 'Giáo án: '.$name)
 @section('fistimg', $listImg[0])
 
 @section('content')
