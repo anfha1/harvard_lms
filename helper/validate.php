@@ -111,4 +111,38 @@ class Validate {
         $res['msg'] = "{$name} Không được để trống";
         return false;
     }
+
+    public static function list_role(&$res, $request, $key='list_role', $name='Danh sách quyền') {
+        if (empty($name)) {
+            $name = $key;
+        }
+
+        if (isset($request[$key])) {
+            if (is_array($request[$key])) {
+                foreach($request[$key] as $index => $role) {
+                    if (is_int($index)) {
+                        if (is_int($request[$key][$index])) {
+                            return true;
+                        } elseif (is_string($request[$key][$index]) && preg_match('/^\d+$/', $request[$key][$index])) {
+                            $request[$key][$index] = (int)$request[$key][$index];
+                            return true;
+                        } else {
+                            $res['msg'] = "{$name} Không đúng định dạng";
+                            return false;
+                        }
+                    } else {
+                        $res['msg'] = "{$name} Không đúng định dạng";
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            $res['msg'] = "{$name} Không đúng định dạng";
+            return false;
+        }
+
+        $res['msg'] = "{$name} Không được để trống";
+        return false;
+    }
 }

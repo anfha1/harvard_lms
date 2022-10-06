@@ -17,6 +17,7 @@ use App\Jobs\Pdf;
 use App\Models\luser;
 use App\Models\lcourse;
 use App\Models\lsession;
+use App\Models\lsessionrole;
 
 class Home extends Controller
 {
@@ -242,6 +243,172 @@ class Home extends Controller
             $res['check_login'] = 1;
         }
 
+        return App::response($res);
+    }
+
+    // Lấy thông tin quyền
+    public function manage_role_get(Request $request) {
+        $res = App::Res();
+        $info = App::CheckLogin($request);
+        $request_all = $request->all();
+
+        if (Validate::number($res, $request_all, 'user_id', 'Người dùng')) {
+            if ($info['status']) {
+                if (App::auth($info['info_user'], [1, 2])) {
+                    $user_select = 0;
+                    $next = true;
+
+                    if ($request_all['user_id'] != 0) {
+                        $user_check_info = luser::find($request_all['user_id']);
+                        if ($user_check_info) {
+                            $user_select = $request_all['user_id'];
+                        } else {
+                            // Không có người dùng k đặt được
+                            $res['msg'] = 'Người dùng không hợp lệ hoặc đã bị xóa vui lòng kiểm tra lại!';
+                            $next = false;
+                        }
+                    }
+
+                    if ($next) {
+                        $res['status'] = 1;
+
+                        // lấy danh sách quyền người dùng đó đang có
+                        $list_role = lsessionrole::select('lsession_id')->where('luser_id', $user_select)->get();
+                        if ($list_role->count() > 0) {
+                            $list_role_tmp = [];
+                            foreach ($list_role as $role) {
+                                $list_role_tmp[] = $role->lsession_id;
+                            }
+                            $list_role = $list_role_tmp;
+                        } else {
+                            $list_role = [];
+                        }
+                        $res['user_role'] = $list_role;
+
+                        // lấy danh sách tất cả quyền
+                        $list_course = lcourse::select('id', 'name')->get();
+                        $list_course_group = [];
+                        $list_role = [];
+                        if ($list_course->count() > 0) {
+                            foreach ($list_course as $course) {
+                                $list_course_group[(int)$course->id] = [
+                                    'name' => $course->name,
+                                    'sessions' => [],
+                                ];
+                            }
+                            $list_session = lsession::select('id', 'name', 'lcourse_id')->get();
+                            if ($list_session->count() > 0) {
+                                foreach ($list_session as $session) {
+                                    if (isset($list_course_group[(int)$session->id])) {
+                                        $list_course_group[(int)$session->id]['sessions'][] = [
+                                            'id' => $session->id,
+                                            'name' => $session->name,
+                                        ];
+                                    }
+                                }
+                            }
+
+                            foreach ($list_course_group as $course) {
+                                $list_role[] = $course;
+                            }
+                        }
+
+                        $res['list_role'] = $list_role;
+                    }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                }
+            } else {
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
+            }
+        }
+
+        return App::response($res);
+    }
+
+    // đặt quyền người dùng
+    public function manage_role_set(Request $request) {
+        $res = App::Res();
+        $info = App::CheckLogin($request);
+        $request_all = $request->all();
+
+        if (Validate::list_role($res, $request_all)) {
+            if (Validate::number($res, $request_all, 'user_id', 'Người dùng')) {
+                if ($info['status']) {
+                    if (App::auth($info['info_user'], [1, 2])) {
+                        $user_select = 0;
+                        $next = true;
+
+                        if ($request_all['user_id'] != 0) {
+                            $user_check_info = luser::find($request_all['user_id']);
+                            if ($user_check_info) {
+                                $user_select = (int)$request_all['user_id'];
+                            } else {
+                                // Không có người dùng k đặt được
+                                $res['msg'] = 'Người dùng không hợp lệ hoặc đã bị xóa vui lòng kiểm tra lại!';
+                                $next = false;
+                            }
+                        }
+
+                        if ($next) {
+                            // var_dump($request_all['list_role']);
+                            $list_check = array_unique($request_all['list_role']); // chứa id của session
+                            $list_av = []; // chứa id của session
+                            $list_del = []; // chỉ ghi lại id role để xóa
+
+                            // lấy danh sách quyền người dùng đó đang có
+                            $list_role = lsessionrole::select('id', 'lsession_id')->where('luser_id', $user_select)->get();
+
+                            foreach ($list_role as $role) {
+                                if (in_array($role->lsession_id, $list_check)) {
+                                    // xóa giá trị khỏi $list_check
+                                    $list_av[] = $role->lsession_id;
+                                    if (($key = array_search($role->lsession_id, $list_check)) !== false) {
+                                        unset($list_check[$key]);
+                                    }
+                                } else {
+                                    // thêm vào chế độ xóa
+                                    $list_del[] = $role->id;
+                                }
+                            }
+
+                            $notTrue = true;
+                            // Tiến thêm quyền cho người dùng
+                            if (count($list_check) > 0) {
+                                $notTrue = false;
+                                lsessionrole::insert(array_map(function($id) use ($user_select) {
+                                    return [
+                                        'luser_id' => $user_select,
+                                        'lsession_id' => $id,
+                                    ];
+                                }, $list_check));
+                            }
+                            // Tiến hành xóa các quyền không cần thiết
+                            if (count($list_del)) {
+                                $notTrue = false;
+                                lsessionrole::whereIn('id', $list_del)->delete();
+                            }
+
+                            // chạy vòng lặp để xem cái nào có cái nào chưa có
+                            if ($notTrue) {
+                                $res['msg'] = 'Xin lỗi không có gì thay đổi!';
+                            } else {
+                                $res['msg'] = 'Đã cập nhật thành công!';
+                                $res['status'] = 1;
+                            }
+                        }
+                    } else {
+                        // không có quyền vô
+                        $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                    }
+                } else {
+                    $res['msg'] = 'Vui lòng đăng nhập!';
+                    $res['check_login'] = 1;
+                }
+            }
+        }
         return App::response($res);
     }
 
