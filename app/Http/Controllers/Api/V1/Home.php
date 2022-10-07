@@ -117,33 +117,80 @@ class Home extends Controller
     }
 
     public function course(Request $request) {
+        // lấy thông tin đăng nhập
+        $info = App::CheckLogin($request);
+        $check_role = true;
+        if ($info['status']) {
+            $id_user = $info['info_user']['id'];
+            if ((int)$info['info_user']['role'] === 1) {
+                $check_role = false;
+            }
+        } else {
+            $id_user = 0;
+        }
+
+        if ($check_role) {
+            // lấy danh sách quyền đang có
+            $list_role = lsessionrole::select('lsession_id')->where('luser_id', $id_user)->get();
+            if ($list_role->count() > 0) {
+                $list_role_tmp = [];
+                foreach ($list_role as $role) {
+                    $list_role_tmp[] = $role->lsession_id;
+                }
+                $list_role = $list_role_tmp;
+            } else {
+                $list_role = [];
+            }
+        }
+
         $list_course = [];
         foreach (lcourse::where('status', 1)->get() as $course) {
             $list_session = [];
             foreach ($course->session()->where('status', 1)->get() as $session) {
                 $ppt_status = 0;
+                if ($check_role) {
+                    if (in_array($session->id, $list_role)) {
+                        $lock = 0;
+                    } else {
+                        $lock = 1;
+                    }
+                } else {
+                    $lock = 0;
+                }
                 $session_info = [
                     'id' => $session->id,
                     'name' => $session->name,
                     'photo' => $session->photo,
+                    'lock' => $lock,
                     'ppt_type' => 0,
+                    'ppt_link' => "",
                     'doc_type' => 0,
+                    'doc_link' => "",
                 ];
-                if ($session->ppttype == 1) {
-                    $data = Storage::get("/ppt/info/{$session->id}.json");
-                    if ($data) {
-                        $info = json_decode($data, 1);
-                        if ($info['status'] == 1) {
-                            $session_info['ppt_type'] = 1;
+                if (!$lock) {
+                    if ($session->ppttype == 1) {
+                        $data = Storage::get("/ppt/info/{$session->id}.json");
+                        if ($data) {
+                            $info = json_decode($data, 1);
+                            if ($info['status'] == 1) {
+                                $session_info['ppt_type'] = 1;
+                                $session_info['ppt_link'] = [
+                                    'course_slug' => $course->slug,
+                                    'course_id' => $course->id,
+                                    'session_slug' => $session->slug,
+                                    'session_id' => $session->id,
+                                ];
+                            }
                         }
                     }
-                }
-                if ($session->doctype == 1) {
-                    $data = Storage::get("/pdf/info/{$session->id}.json");
-                    if ($data) {
-                        $info = json_decode($data, 1);
-                        if ($info['status'] == 1) {
-                            $session_info['doc_type'] = 1;
+                    if ($session->doctype == 1) {
+                        $data = Storage::get("/pdf/info/{$session->id}.json");
+                        if ($data) {
+                            $info = json_decode($data, 1);
+                            if ($info['status'] == 1) {
+                                $session_info['doc_type'] = 1;
+                                $session_info['doc_link'] = "/doc/{$course->slug}-{$course->id}/{$session->slug}-{$session->id}.html";
+                            }
                         }
                     }
                 }
@@ -249,10 +296,10 @@ class Home extends Controller
     // Lấy thông tin quyền
     public function manage_role_get(Request $request) {
         $res = App::Res();
-        $info = App::CheckLogin($request);
         $request_all = $request->all();
 
         if (Validate::number($res, $request_all, 'user_id', 'Người dùng')) {
+            $info = App::CheckLogin($request);
             if ($info['status']) {
                 if (App::auth($info['info_user'], [1, 2])) {
                     $user_select = 0;

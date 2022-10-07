@@ -7,10 +7,17 @@ use App\Http\Controllers\View\Pdf as ControllersViewPdf;
 use App\Http\Controllers\View\Ppt as ControllersViewPpt;
 
 // hiển thị document
-Route::get('/pdf/{id_session}', [ControllersViewPdf::class, 'view'])->where('id_session', '[0-9]+');
+// Route::get('/pdf/{id_session}', [ControllersViewPdf::class, 'view'])->where('id_session', '[0-9]+');
 
 // hiển thị powerpoint
 Route::get('/ppt/{id_ppt}/{id_session}', [ControllersViewPpt::class, 'view'])->name('ppt.view')->where('id_ppt', '[0-9]+')->where('id_session', '[0-9]+');
+
+// hiển thị tài liệu
+Route::get('/doc/{course_slug}-{course_id}/{session_slug}-{session_id}.html', [ControllersViewPdf::class, 'view'])
+->where('course_slug', '[a-z0-9-]+')
+->where('course_id', '[0-9]+')
+->where('session_slug', '[a-z0-9-]+')
+->where('session_id', '[0-9]+');
 
 // các request giả
 Route::post('/Base/CheckLangCookie', function() {
