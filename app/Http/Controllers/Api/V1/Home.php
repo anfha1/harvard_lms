@@ -299,8 +299,8 @@ class Home extends Controller
                             $list_session = lsession::select('id', 'name', 'lcourse_id')->get();
                             if ($list_session->count() > 0) {
                                 foreach ($list_session as $session) {
-                                    if (isset($list_course_group[(int)$session->id])) {
-                                        $list_course_group[(int)$session->id]['sessions'][] = [
+                                    if (isset($list_course_group[(int)$session->lcourse_id])) {
+                                        $list_course_group[(int)$session->lcourse_id]['sessions'][] = [
                                             'id' => $session->id,
                                             'name' => $session->name,
                                         ];
