@@ -52,6 +52,9 @@ Route::post('/blog', [ControllersApiV1Home::class, 'blog']);
 // giải lập khối và lớp học
 Route::post('/course', [ControllersApiV1Home::class, 'course']);
 
+// check quyền xem ppt
+Route::post('ppt/role/check', [ControllersApiV1Home::class, 'ppt_role_check']);
+
 // lấy danh sách khóa học với trang thái quản trị viên
 Route::post('/manage/user', [ControllersApiV1Home::class, 'manage_user']);
 

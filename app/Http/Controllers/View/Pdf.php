@@ -25,9 +25,9 @@ class Pdf extends Controller {
             ) {
                 $course_info = lcourse::select('slug')->where('id', $course_id)->get();
                 if ($course_info->count() > 0 && $course_info->first()->slug == $course_slug) {
-                    $info_ppt = json_decode(Storage::get("/pdf/info/{$session_id}.json"), 1);
-                    if (isset($info_ppt['status'])) {
-                        if (isset($info_ppt['list']) && count($info_ppt['list']) > 0) {
+                    $info_pdf = json_decode(Storage::get("/pdf/info/{$session_id}.json"), 1);
+                    if (isset($info_pdf['status'])) {
+                        if (isset($info_pdf['list']) && count($info_pdf['list']) > 0) {
                             // lấy thông tin đăng nhập
                             $info = App::CheckLogin($request);
                             $check_role = true;
@@ -54,7 +54,7 @@ class Pdf extends Controller {
 
                             if ($is_view) {
                                 return view('pages.pdf', [
-                                    'list_photo' => $info_ppt['list'],
+                                    'list_photo' => $info_pdf['list'],
                                     'name' => $session_info->name,
                                 ]);
                             } else {
@@ -75,24 +75,5 @@ class Pdf extends Controller {
         }
 
         return 'Tài liệu không tồn tại';
-
-        // $info = App::CheckLogin($request);
-        // if ($info['status']) {
-        //     $session_info = lsession::find($id_session);
-        //     if ($session_info) {
-        //         if ($session_info->doctype) {
-        //             $info_ppt = json_decode(Storage::get("/pdf/info/{$session_info->id}.json"), 1);
-        //             if (isset($info_ppt['list']) && count($info_ppt['list']) > 0) {
-        //                 return view('pages.pdf', [
-        //                     'list_photo' => $info_ppt['list'],
-        //                     'name' => $session_info->name,
-        //                 ]);
-        //             }
-        //         }
-        //     }
-        //     return 'Tài liệu không tồn tại!';
-        // } else {
-        //     return 'Vui lòng đăng nhập!';
-        // }
     }
 }

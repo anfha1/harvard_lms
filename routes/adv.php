@@ -16,7 +16,7 @@ Route::get('/ppt/{ppt_id}/{session_id}', [ControllersViewPpt::class, 'view'])
 ->where('session_id', '[0-9]+');
 
 // hiển thị tài liệu
-Route::get('/view/doc/{course_slug}-{course_id}/{session_slug}-{session_id}.html', [ControllersViewPdf::class, 'view'])
+Route::get('/view/doc/{course_slug}/{course_id}/{session_slug}/{session_id}', [ControllersViewPdf::class, 'view'])
 ->name('doc.view')
 ->where('course_slug', '[a-z0-9-]+')
 ->where('course_id', '[0-9]+')

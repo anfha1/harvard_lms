@@ -189,7 +189,7 @@ class Home extends Controller
                             $info = json_decode($data, 1);
                             if ($info['status'] == 1) {
                                 $session_info['doc_type'] = 1;
-                                $session_info['doc_link'] = "/view/doc/{$course->slug}-{$course->id}/{$session->slug}-{$session->id}.html";
+                                $session_info['doc_link'] = "/view/doc/{$course->slug}/{$course->id}/{$session->slug}/{$session->id}";
                             }
                         }
                     }
@@ -209,6 +209,74 @@ class Home extends Controller
             'msg' => '',
             'courses' => $list_course,
         ]);
+    }
+
+    public function ppt_role_check(Request $request) {
+        $res = App::Res([
+            'link' => '',
+        ]);
+        $session_info = lsession::select('slug', 'name', 'doctype', 'lcourse_id')->where('id', $request->session_id)->get();
+        if ($session_info->count() > 0) {
+            $session_info = $session_info->first();
+            if (
+                $session_info->doctype == 1 &&
+                $session_info->slug == $request->session_slug &&
+                $session_info->lcourse_id == $request->course_id
+            ) {
+                $course_info = lcourse::select('slug')->where('id', $request->course_id)->get();
+                if ($course_info->count() > 0 && $course_info->first()->slug == $request->course_slug) {
+                    $info_ppt = json_decode(Storage::get("/ppt/info/{$request->session_id}.json"), 1);
+                    if (isset($info_ppt['status']) && $info_ppt['status'] == 1) {
+                        // lấy thông tin đăng nhập
+                        $info = App::CheckLogin($request);
+                        $check_role = true;
+                        if ($info['status']) {
+                            $id_user = $info['info_user']['id'];
+                            if ((int)$info['info_user']['role'] === 1) {
+                                $check_role = false;
+                            }
+                        } else {
+                            $id_user = 0;
+                        }
+
+                        if ($check_role) {
+                            // check xem có quyền xem hay không?
+                            $list_role = lsessionrole::select('id')->where('luser_id', $id_user)->where('lsession_id', $request->session_id)->get();
+                            if ($list_role->count() > 0) {
+                                $is_view = true;
+                            } else {
+                                $is_view = false;
+                            }
+                        } else {
+                            $is_view = true;
+                        }
+
+                        if ($is_view) {
+                            $res['status'] = 1;
+                            $res['link'] = "/ppt/{$info_ppt['idc']}/{$request->session_id}";
+                        } else {
+                            if ($info['status']) {
+                                // không có quyền xem
+                                $res['msg'] =  'Tài liệu bị khóa - bạn không có quyền xem!';
+                            } else {
+                                // yêu cầu đăng nhập
+                                $res['msg'] =  'Vui lòng đăng nhập!';
+                            }
+                        }
+                    } else {
+                        $res['msg'] = 'Tài liệu không tồn tại';
+                    }
+                } else {
+                    $res['msg'] = 'Tài liệu không tồn tại';
+                }
+            } else {
+                $res['msg'] = 'Tài liệu không tồn tại';
+            }
+        } else {
+            $res['msg'] = 'Tài liệu không tồn tại';
+        }
+
+        return App::response($res);
     }
 
     // hiển thị danh sách user cho quản lý user
