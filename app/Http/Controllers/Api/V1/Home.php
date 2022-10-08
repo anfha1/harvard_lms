@@ -215,11 +215,11 @@ class Home extends Controller
         $res = App::Res([
             'link' => '',
         ]);
-        $session_info = lsession::select('slug', 'name', 'doctype', 'lcourse_id')->where('id', $request->session_id)->get();
+        $session_info = lsession::select('slug', 'name', 'ppttype', 'lcourse_id')->where('id', $request->session_id)->get();
         if ($session_info->count() > 0) {
             $session_info = $session_info->first();
             if (
-                $session_info->doctype == 1 &&
+                $session_info->ppttype == 1 &&
                 $session_info->slug == $request->session_slug &&
                 $session_info->lcourse_id == $request->course_id
             ) {
