@@ -4,7 +4,7 @@ namespace App\Console\Commands\fai;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
-use App\Models\lppt;
+use App\Models\lsession;
 
 class processppt extends Command
 {
@@ -29,43 +29,116 @@ class processppt extends Command
      */
     public function handle()
     {
-        # B1: truyền style và content vào 2 tệp ở bin
+        $idc = 1664717770712; # idc của powepoint
+        $id_session = 5; # id của session
 
-        # B2: sau đó nhập id là tên ppt vào đây
-        $id = '1662559740000';
+        $status = true; // xử lý có được hay không nếu đc cho vào true không thì false
+        $msg = ''; // text thông báo nếu xử lý bị lỗi
 
-        # B3: nếu ppt không đúng thì chuyển thành false để báo lỗi
-        $status = true;
+        // đường đẫn đến thư mục đã render nếu xử lý thành công
+        $path = 'C:\PTA_Media\Project\PHP_8\harvard_lms\public\ppt\1662515239603 (Published)';
+        // __DIR__.'/../../../../storage/app/1662560906049';
 
-        # B4: Chạy lênh "php artisan fai:processppt" để chuyển đổi thành định dạng cần
+        // không sửa đổi gì ở dưới này
+        $session_info = lsession::find($id_session);
+        if ($session_info) {
+            if ($session_info->ppttype) {
+                if ($status) {
+                    $this->process_data($id_session, $idc, $path);
+                } else {
+                    $path_file_info = "/ppt/info/{$id_session}.json";
+                    $ppt_info = json_decode(Storage::get($path_file_info), 1);
+                    $ppt_info['status'] = 2;
+                    $ppt_info['msg'] = $msg;
+                    Storage::put($path_file_info, json_encode($ppt_info));
+                }
+            } else {
+                echo 'Chưa tải lên ppt!';
+            }
+        } else {
+            echo 'Không có session!';
+        }
+    }
 
-        // khu vực xử lý ppt cho về đúng chuẩn
-        $ppt = lppt::where('idc', $id)->first();
+    private function process_data($id_session, $idc, $path) {
+        $path_file_info = "/ppt/info/{$id_session}.json";
+        $ppt_info = json_decode(Storage::get($path_file_info), 1);
+        if (is_dir($path)) {
+            $path = realpath($path);
+            if (is_dir($path.'/data') && is_file($path.'/index.html')) {
+                $dataRender = $this->process_html($path.'/index.html');
 
-        if ($ppt) {
-            if ($status) {
-                // xóa file index
-                $fileIndex = public_path("ppt/{$id}").'/index.html';
-                if (is_file($fileIndex)) {
-                    unlink($fileIndex);
+                // xử lý xong tiến hành xóa file index.html
+                unlink($path.'/index.html');
+
+                // di chuyển toàn bộ thư mục qua thư mục được chỉ định
+                $folder = public_path('ppt');
+                if (!is_dir($folder)) {
+                    mkdir($folder);
+                }
+                $folder .= '/'.$idc;
+                if (!is_dir($folder)) {
+                    mkdir($folder);
                 }
 
-                // b2 copy style và content vào file lưu trữ
-                Storage::disk('ftp')->put("ppt_{$ppt->id}.json", json_encode([
-                    'style' => file_get_contents(__dir__.'/bin/style.html'),
-                    'content' => file_get_contents(__dir__.'/bin/content.html'),
-                ]));
-
-                // b3 chuyển trạng thái về ok
-                $ppt->status = 1;
+                $this->cut_folder($path, $folder);
+                $ppt_info['data'] = $dataRender;
+                $ppt_info['status'] = 1;
+                Storage::put($path_file_info, json_encode($ppt_info));
             } else {
-                // chuyển trang thái về không ok để báo file lỗi
-                $ppt->status = 2;
+                echo 'Thư mục không hợp lệ! 1';
             }
-            $ppt->save();
         } else {
-            echo $id." Không tồn tại\n";
+            echo 'Thư mục không tồn tại! 2';
         }
-        
+    }
+
+    private function process_html($file) {
+        $dom = new \DomDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTMLFile($file);
+        $head = $dom->getElementsByTagName('head')[0];
+        $dataHead = '';
+        foreach ($head->childNodes as $child) {
+            if ($child->nodeName != 'meta' && $child->nodeName != '#text' && $child->nodeName != 'title') {
+                if (
+                    $child->nodeName == 'link' &&
+                    $child->hasAttribute('rel') &&
+                    $child->getAttribute('rel') == 'shortcut icon'
+                ) {
+                    echo "Đã loại bỏ icon\n";
+                } else {
+                    $dataHead .= $dom->saveHTML($child);
+                }
+            }
+        }
+        $body = $dom->getElementsByTagName('body')[0];
+        $dataRender['style'] = $dataHead;
+        $dataRender['content'] = $dom->saveHTML($body);
+        libxml_clear_errors();
+        return $dataRender;
+    }
+
+    private function cut_folder($from, $to) {
+        foreach(glob($from.'/*') as $file) {
+            $fileName = preg_replace('/^'.preg_quote($from, '/').'\//', '', $file);
+            $fileNameNew = $to.'/'.$fileName;
+
+            if (is_dir($file)) {
+                // tạo thư mục
+                if (!is_dir($fileNameNew)) {
+                    mkdir($fileNameNew);
+                }
+                // tiếp tục cut thưu mục bên trong
+                $this->cut_folder($file, $fileNameNew);
+            } else {
+                // copy file và xóa file cũ
+                rename($file, $fileNameNew);
+                // unlink($file);
+            }
+        }
+
+        // xóa thư mục cũ
+        rmdir($from);
     }
 }

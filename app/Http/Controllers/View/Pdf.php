@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Session;
 
 class Pdf extends Controller {
     public function view(Request $request, $course_slug, $course_id, $session_slug, $session_id) {
-        // liêm tra tài liệu có tồn tại hay không trước
+        // kiêm tra tài liệu có tồn tại hay không trước
         $session_info = lsession::select('slug', 'name', 'doctype', 'lcourse_id')->where('id', $session_id)->get();
 
         if ($session_info->count() > 0) {

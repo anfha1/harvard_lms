@@ -15,6 +15,7 @@
   <meta name="msapplication-tap-highlight" content="no" />
   <title>@yield('title', config('app.name', 'Fai'))</title>
   {!! $dataRender['style'] !!}
+  <link rel="icon" href="/icon.png" />
 </head>
 <body>
   {!! $dataRender['content'] !!}

@@ -189,7 +189,7 @@ class Home extends Controller
                             $info = json_decode($data, 1);
                             if ($info['status'] == 1) {
                                 $session_info['doc_type'] = 1;
-                                $session_info['doc_link'] = "/doc/{$course->slug}-{$course->id}/{$session->slug}-{$session->id}.html";
+                                $session_info['doc_link'] = "/view/doc/{$course->slug}-{$course->id}/{$session->slug}-{$session->id}.html";
                             }
                         }
                     }
