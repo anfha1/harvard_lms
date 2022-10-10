@@ -64,6 +64,15 @@ Route::post('/manage/user/create', [ControllersApiV1Home::class, 'manage_user_cr
 // Sửa tài khoản
 Route::post('/manage/user/edit', [ControllersApiV1Home::class, 'manage_user_edit']);
 
+// Xóa tài khoản
+Route::post('/manage/user/delete', [ControllersApiV1Home::class, 'manage_user_delete']);
+
+// Xóa tài khoản
+Route::post('/manage/user/lock', [ControllersApiV1Home::class, 'manage_user_lock']);
+
+// Xóa tài khoản
+Route::post('/manage/user/active', [ControllersApiV1Home::class, 'manage_user_active']);
+
 // lấy danh sách quyền
 Route::post('/manage/role/get', [ControllersApiV1Home::class, 'manage_role_get']);
 

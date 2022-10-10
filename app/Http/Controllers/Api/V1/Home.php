@@ -463,6 +463,112 @@ class Home extends Controller
         return App::response($res);
     }
 
+    // xóa tài khoản
+    public function manage_user_delete(Request $request) {
+        $request_all = $request->all();
+        $res = App::Res();
+
+        if (Validate::number($res, $request_all, 'user_id', 'Tài khoản')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    // kiểm tra tài khoản
+                    $user = luser::find($request_all['user_id']);
+                    if ($user) {
+                        // xóa các quyền của người dùng
+                        // xóa tài khoản
+                        lsessionrole::where('luser_id', $request_all['user_id'])->delete();
+                        $user->delete();
+                        $res['status'] = 1;
+                        $res['msg'] = 'Đã xóa thành công';
+                    } else {
+                        $res['msg'] = 'Tài khoản không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                }
+            } else {
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
+            }
+        }
+
+        return App::response($res);
+    }
+
+    // kích hoạt tài khoản
+    public function manage_user_active(Request $request) {
+        $request_all = $request->all();
+        $res = App::Res();
+
+        if (Validate::number($res, $request_all, 'user_id', 'Tài khoản')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    // kiểm tra tài khoản
+                    $user = luser::find($request_all['user_id']);
+                    if ($user) {
+                        if ($user->status) {
+                            $res['msg'] = 'Tài khoản đang hoạt động!';
+                        } else {
+                            $user->status = 1;
+                            $user->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã cập nhật thành công';
+                        }
+                    } else {
+                        $res['msg'] = 'Tài khoản không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                }
+            } else {
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
+            }
+        }
+
+        return App::response($res);
+    }
+
+    // vô hiệu hóa tài khoản
+    public function manage_user_lock(Request $request) {
+        $request_all = $request->all();
+        $res = App::Res();
+
+        if (Validate::number($res, $request_all, 'user_id', 'Tài khoản')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    // kiểm tra tài khoản
+                    $user = luser::find($request_all['user_id']);
+                    if ($user) {
+                        if ($user->status) {
+                            $user->status = 0;
+                            $user->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã cập nhật thành công';
+                        } else {
+                            $res['msg'] = 'Tài khoản đang bị vô hiệu hóa!';
+                        }
+                    } else {
+                        $res['msg'] = 'Tài khoản không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                }
+            } else {
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
+            }
+        }
+
+        return App::response($res);
+    }
+
     // Lấy thông tin quyền
     public function manage_role_get(Request $request) {
         $res = App::Res();
