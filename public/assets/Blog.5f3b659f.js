@@ -1,0 +1,1 @@
+import{L as e}from"./Basic.fefbb074.js";import{d as t,c as o,w as a,o as s,e as n}from"./index.901d2790.js";const c=n("h3",null,"Qu\u1EA3n l\xFD tin t\u1EE9c",-1),p=t({__name:"Blog",setup(r){return(u,_)=>(s(),o(e,null,{default:a(()=>[c]),_:1}))}});export{p as default};
