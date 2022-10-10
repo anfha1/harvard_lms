@@ -39,16 +39,16 @@
             }
 
             .content-timer {
-                background-image: url(../../Content/images/ITS/box_control_timer.png);
+                background-image: url(/Content/images/ITS/box_control_timer.png);
                 justify-content:space-around;
 
             }
             .class-minute {
-                background-image: url(../../Content/images/ITS/box_timer.png)
+                background-image: url(/Content/images/ITS/box_timer.png)
             }
 
             .class-second {
-                background-image: url(../../Content/images/ITS/box_timer.png)
+                background-image: url(/Content/images/ITS/box_timer.png)
             }
             #idTimerStart {
                 background-image: linear-gradient(to bottom, #e8e8e8 76%, #8f8f8f 102%);
@@ -213,7 +213,7 @@
     <body>
         <header></header>
 
-        <content id="content-book" style="display:none; align-items:center; justify-content:center; overflow:hidden; height:100vh; min-height: 100vh; flex-direction:column; position:relative; background:url(../../Content/images/bgebook.png); background-size: cover; background-position: bottom center;">
+        <content id="content-book" style="display:none; align-items:center; justify-content:center; overflow:hidden; height:100vh; min-height: 100vh; flex-direction:column; position:relative; background:url(/Content/images/bgebook.png); background-size: cover; background-position: bottom center;">
             <div class="book-content pb-3" style="position: absolute; display: flex; justify-content: center; align-items: center; width: 100%;padding:0">
                 <img id="activity-trigger" class="trigger-activity-btn content-hide" src="/Content/images/Amanda/activity-btn.png" onclick="Common.EReaderThemeIndex.triggerActivityBtn()">
                 <div class="bg-zoom" id="bg-zoom" style=" width:100%; overflow: hidden;">
