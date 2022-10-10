@@ -61,10 +61,13 @@ Route::post('/manage/user', [ControllersApiV1Home::class, 'manage_user']);
 // Tạo tài khoản mới
 Route::post('/manage/user/create', [ControllersApiV1Home::class, 'manage_user_create']);
 
-// Tạo tài khoản mới
+// Sửa tài khoản
+Route::post('/manage/user/edit', [ControllersApiV1Home::class, 'manage_user_edit']);
+
+// lấy danh sách quyền
 Route::post('/manage/role/get', [ControllersApiV1Home::class, 'manage_role_get']);
 
-// Tạo tài khoản mới
+// cập nhật quyền tài khoản
 Route::post('/manage/role/set', [ControllersApiV1Home::class, 'manage_role_set']);
 
 // lấy danh sách khóa học với trang thái quản trị viên

@@ -361,6 +361,108 @@ class Home extends Controller
         return App::response($res);
     }
 
+    // Sửa tài khoản
+    public function manage_user_edit(Request $request) {
+        $request_all = $request->all();
+        $res = App::Res();
+
+        if (Validate::number($res, $request_all, 'user_id', 'Tài khoản')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    // kiểm tra tài khoản
+                    $user = luser::find($request_all['user_id']);
+                    if ($user) {
+                        $change = false;
+                        $next = true;
+                        if (!empty($request->username)) {
+                            if (Validate::username($res, $request_all)) {
+                                if ($request_all['username'] != $user->username) {
+                                    $user->username = $request_all['username'];
+                                    $change = true;
+                                }
+                            } else {
+                                $next = false;
+                            }
+                        }
+                        if ($next && !empty($request->password)) {
+                            if (Validate::password($res, $request_all)) {
+                                if (md5($request_all['password']) != $user->password) {
+                                    $user->password = md5($request_all['password']);
+                                    $change = true;
+                                }
+                            } else {
+                                $next = false;
+                            }
+                        }
+                        if ($next && !empty($request->name)) {
+                            if (Validate::name($res, $request_all, 'name', 'Tên hiển thị')) {
+                                if ($request_all['name'] != $user->name) {
+                                    $user->name = $request_all['name'];
+                                    $change = true;
+                                }
+                            } else {
+                                $next = false;
+                            }
+                        }
+                        if ($next && !empty($request->role)) {
+                            if (Validate::role($res, $request_all)) {
+                                if ($request_all['role'] != $user->role) {
+                                    $user->role = $request_all['role'];
+                                    $change = true;
+                                }
+                            } else {
+                                $next = false;
+                            }
+                        }
+
+                        if ($next && $request->file('avatar')) {
+                            $file_img = public_path().$user->photo;
+                            if (is_file($file_img)) {
+                                unlink($file_img);
+                            }
+
+                            $file = $request->file('avatar');
+                            $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                            $file->move(public_path('upload/photo'), $filename);
+                            $user->photo = '/upload/photo/' . $filename;
+                            $change = true;
+                        }
+
+                        if ($next && $request->tags) {
+                            if ($request->tags != $user->tags) {
+                                $user->tags = $request->tags;
+                                $change = true;
+                            }
+                        }
+
+                        if ($next) {
+                            if ($change) {
+                                $user->save();
+                                $res['msg'] = 'Cập nhật thành công!';
+                                $res['status'] = 1;
+                            } else {
+                                $res['msg'] = 'Không có gì thay đổi!';
+                            }
+                        }
+
+                        // tiền hành kiểm tra các trường và các trường và các thứ thay đổi
+                    } else {
+                        $res['msg'] = 'Tài khoản không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                }
+            } else {
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
+            }
+        }
+
+        return App::response($res);
+    }
+
     // Lấy thông tin quyền
     public function manage_role_get(Request $request) {
         $res = App::Res();
