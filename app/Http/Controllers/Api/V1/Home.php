@@ -778,9 +778,17 @@ class Home extends Controller
                     // tiến hành tạo :))
                     $course = lcourse::find($request_all['course_id']);
                     if ($course) {
+                        $listSesssion = lsession::select('id')->where('lcourse_id', $request_all['course_id'])->get();
+                        if ($listSesssion && $listSesssion->count() > 0) {
+                            foreach ($listSesssion as $session) {
+                                lsessionrole::where('lsession_id', $session->id)->delete();
+                            }
+                        }
+                        lsession::where('lcourse_id', $request_all['course_id'])->delete();
                         $course->delete();
+
                         $res['status'] = 1;
-                        $res['msg'] = 'Đã tạo lớp thành công';
+                        $res['msg'] = 'Đã xóa lớp (khối) thành công';
                     } else {
                         $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
@@ -800,6 +808,7 @@ class Home extends Controller
     // tạo tiết mới yêu cầu quyền admin
     public function manage_session_create(Request $request) {
         $res = App::Res();
+        $request_all = $request->all();
 
         if (Validate::number($res, $request_all, 'course_id', 'Lớp (khối)')) {
             $info = App::CheckLogin($request);
@@ -813,6 +822,7 @@ class Home extends Controller
                             $session = new lsession;
                             $session->name = $request->name;
                             $session->slug = Str::slug($request->name, '-');
+                            $session->lcourse_id = $request_all['course_id'];
                             if (!empty($request->description)) {
                                 $session->description = $request->description;
                             }
@@ -848,8 +858,8 @@ class Home extends Controller
 
     // sửa tiết yêu cầu quyền admin
     public function manage_session_edit(Request $request) {
-        $request_all = $request->all();
         $res = App::Res();
+        $request_all = $request->all();
 
         if (Validate::number($res, $request_all, 'session_id', 'Tiết')) {
             $info = App::CheckLogin($request);
@@ -988,6 +998,7 @@ class Home extends Controller
                     // tiến hành tạo :))
                     $session = lsession::find($request_all['session_id']);
                     if ($session) {
+                        lsessionrole::where('lsession_id', $session->id)->delete();
                         $session->delete();
                         $res['status'] = 1;
                         $res['msg'] = 'Đã tạo tiết thành công';

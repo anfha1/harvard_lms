@@ -2,7 +2,7 @@
 namespace Fai\Lib;
 
 class Validate {
-    public static function number(&$res, &$request, $key, $name='') {
+    public static function number(&$res, &$request, $key='number', $name='') {
         if (empty($name)) {
             $name = $key;
         }
