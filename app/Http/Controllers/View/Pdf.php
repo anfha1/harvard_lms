@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\lcourse;
 use App\Models\lsession;
+use App\Models\lsessionrole;
 use Fai\Lib\App;
 
 use Illuminate\Support\Facades\Session;
