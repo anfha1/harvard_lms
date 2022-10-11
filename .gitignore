@@ -8,6 +8,7 @@
 /public/pdf
 /public/ppt
 /public/upload
+/public/tmp
 .env
 .env.backup
 .phpunit.result.cache

@@ -1245,7 +1245,8 @@ class Home extends Controller
                             'nameor' => $file->getClientOriginalName(),
                             'status' => 0,
                         ];
-                        $file_upload_info['name'] = $file_upload_info['idc'].'.'.pathinfo($file_upload_info['nameor'], PATHINFO_EXTENSION);
+                        $file_exten = pathinfo($file_upload_info['nameor'], PATHINFO_EXTENSION);
+                        $file_upload_info['name'] = $file_upload_info['idc'].'.'.$file_exten;
                         $file->move(public_path('upload/ppt'), $file_upload_info['name']);
 
                         // kiểm tra xem file đã có chưa
@@ -1270,11 +1271,85 @@ class Home extends Controller
                             $session->save();
                         }
 
-                        // lưu lại thông tin file
-                        Storage::put($path_file_info, json_encode($file_upload_info));
+                        $res['test'] = $file_exten;
 
-                        $res['status'] = 1;
-                        $res['msg'] = 'Tải lên thành công';
+                        if ($file_exten == 'zip') {
+                            $ppt_info = $file_upload_info;
+                            $path_file_zip = public_path('upload/ppt').'/'.$ppt_info['name'];
+                            $file_exten = pathinfo($path_file_zip, PATHINFO_EXTENSION);
+
+                            $folder_tmp = public_path('tmp');
+                            if (!is_dir($folder_tmp)) {
+                                mkdir($folder_tmp);
+                            }
+                            $folder_tmp .= '/'.$ppt_info['idc'];
+                            if (!is_dir($folder_tmp)) {
+                                mkdir($folder_tmp);
+                            } else {
+                                App::deleteDir($folder_tmp);
+                                mkdir($folder_tmp);
+                            }
+
+                            $zip = new \ZipArchive;
+                            $res = $zip->open($path_file_zip);
+                            if ($res === TRUE) {
+                                $zip->extractTo($folder_tmp);
+                                $zip->close();
+
+                                $validate = true;
+                                if (is_file($folder_tmp.'/index.html') && is_dir($folder_tmp.'/data.local-only')) {
+                                    $folder_data = $folder_tmp;
+                                } else {
+                                    $list_file_of_tmp = glob($folder_tmp.'/*');
+                                    if (count($list_file_of_tmp) === 1) {
+                                        $folder_data_tmp = $list_file_of_tmp[0];
+                                        if (is_dir($folder_data_tmp) && is_file($folder_data_tmp.'/index.html') && is_dir($folder_data_tmp.'/data.local-only')) {
+                                            $folder_data = $folder_data_tmp;
+                                        } else {
+                                            $validate = false;
+                                        }
+                                    } else {
+                                        $validate = false;
+                                    }
+                                }
+
+                                if ($validate) {
+                                    $dataRender = $this->process_html($folder_data.'/index.html');
+
+                                    // xử lý xong tiến hành xóa file index.html
+                                    unlink($folder_data.'/index.html');
+
+                                    // di chuyển toàn bộ thư mục qua thư mục được chỉ định
+                                    $folder = public_path('ppt');
+                                    if (!is_dir($folder)) {
+                                        mkdir($folder);
+                                    }
+                                    $folder .= '/'.$ppt_info['idc'];
+                                    if (!is_dir($folder)) {
+                                        mkdir($folder);
+                                    }
+
+                                    $this->cut_folder($folder_data, $folder);
+                                    $ppt_info['data'] = $dataRender;
+                                    $ppt_info['status'] = 1;
+                                    Storage::put($path_file_info, json_encode($ppt_info));
+
+                                    App::deleteDir($folder_tmp);
+                                    $res['status'] = 1;
+                                    $res['msg'] = 'Đã tải lên và xử lý thành công';
+                                } else {
+                                    App::deleteDir($folder_tmp);
+                                    $res['msg'] = 'File Zip không hợp lệ!';
+                                }
+                            } else {
+                                $res['msg'] = 'File Zip không hợp lệ!';
+                            }
+                        } else {
+                            // lưu lại thông tin file
+                            Storage::put($path_file_info, json_encode($file_upload_info));
+                            $res['status'] = 1;
+                            $res['msg'] = 'Tải lên thành công';
+                        }
                     }
                 } else {
                     $res['msg'] = "Tiết Không tồn tại hoặc đẵ bị xóa vui lòng thử lại";
@@ -1349,42 +1424,47 @@ class Home extends Controller
                             'nameor' => $file->getClientOriginalName(),
                             'status' => 0,
                         ];
-                        $file_upload_info['name'] = $file_upload_info['idc'].'.'.pathinfo($file_upload_info['nameor'], PATHINFO_EXTENSION);
-                        $file->move(public_path('upload/pdf'), $file_upload_info['name']);
-
-                        // kiểm tra xem file đã có chưa
-                        $path_file_info = "/pdf/info/{$session->id}.json";
-                        if ($session->doctype) {
-                            $data = Storage::get($path_file_info);
-                            if ($data) {
-                                $pdf_info = json_decode($data, 1);
-
-                                // xóa file pdf cũ
-                                $file_pdf = public_path('upload/pdf').'/'.$pdf_info['name'];
-                                if (is_file($file_pdf)) {
-                                    unlink($file_pdf);
-                                }
-
-                                // xóa folder pdf nếu đã process xong
-                                $folder_pdf = public_path('pdf').'/'.$pdf_info['idc'];
-                                if (is_dir($folder_pdf)) {
-                                    App::deleteDir($folder_pdf);
-                                }
-                            }
-                        } else {
-                            // cập nhật thông tin df
-                            $session->doctype = 1;
-                            $session->save();
-                        }
-
-                        // lưu lại thông tin file
-                        Storage::put($path_file_info, json_encode($file_upload_info));
+                        $file_exten = pathinfo($file_upload_info['nameor'], PATHINFO_EXTENSION);
 
                         // chuyển pdf thành ảnh
-                        Pdf::dispatch($file_upload_info['idc'], $file_upload_info['name'], $path_file_info);
+                        if ($file_exten == 'pdf') {
+                            $file_upload_info['name'] = $file_upload_info['idc'].'.'.$file_exten;
+                            $file->move(public_path('upload/pdf'), $file_upload_info['name']);
 
-                        $res['status'] = 1;
-                        $res['msg'] = 'Tải lên thành công';
+                            // kiểm tra xem file đã có chưa
+                            $path_file_info = "/pdf/info/{$session->id}.json";
+                            if ($session->doctype) {
+                                $data = Storage::get($path_file_info);
+                                if ($data) {
+                                    $pdf_info = json_decode($data, 1);
+
+                                    // xóa file pdf cũ
+                                    $file_pdf = public_path('upload/pdf').'/'.$pdf_info['name'];
+                                    if (is_file($file_pdf)) {
+                                        unlink($file_pdf);
+                                    }
+
+                                    // xóa folder pdf nếu đã process xong
+                                    $folder_pdf = public_path('pdf').'/'.$pdf_info['idc'];
+                                    if (is_dir($folder_pdf)) {
+                                        App::deleteDir($folder_pdf);
+                                    }
+                                }
+                            } else {
+                                // cập nhật thông tin df
+                                $session->doctype = 1;
+                                $session->save();
+                            }
+
+                            // lưu lại thông tin file
+                            Storage::put($path_file_info, json_encode($file_upload_info));
+
+                            Pdf::dispatch($file_upload_info['idc'], $file_upload_info['name'], $path_file_info);
+                            $res['msg'] = 'Tải lên thành công';
+                            $res['status'] = 1;
+                        } else {
+                            $res['msg'] = 'File không hợp lệ vui lòng tải lên pdf!';
+                        }
                     }
                 } else {
                     $res['msg'] = "Tiết Không tồn tại hoặc đẵ bị xóa vui lòng thử lại";
@@ -1448,5 +1528,54 @@ class Home extends Controller
             'id' => '1',
             'succeeded' => true
         ]);
+    }
+
+    private function process_html($file) {
+        $dom = new \DomDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTMLFile($file);
+        $head = $dom->getElementsByTagName('head')[0];
+        $dataHead = '';
+        foreach ($head->childNodes as $child) {
+            if ($child->nodeName != 'meta' && $child->nodeName != '#text' && $child->nodeName != 'title') {
+                if (
+                    $child->nodeName == 'link' &&
+                    $child->hasAttribute('rel') &&
+                    $child->getAttribute('rel') == 'shortcut icon'
+                ) {
+                    echo "Đã loại bỏ icon\n";
+                } else {
+                    $dataHead .= $dom->saveHTML($child);
+                }
+            }
+        }
+        $body = $dom->getElementsByTagName('body')[0];
+        $dataRender['style'] = $dataHead;
+        $dataRender['content'] = $dom->saveHTML($body);
+        libxml_clear_errors();
+        return $dataRender;
+    }
+
+    private function cut_folder($from, $to) {
+        foreach(glob($from.'/*') as $file) {
+            $fileName = preg_replace('/^'.preg_quote($from, '/').'\//', '', $file);
+            $fileNameNew = $to.'/'.$fileName;
+
+            if (is_dir($file)) {
+                // tạo thư mục
+                if (!is_dir($fileNameNew)) {
+                    mkdir($fileNameNew);
+                }
+                // tiếp tục cut thưu mục bên trong
+                $this->cut_folder($file, $fileNameNew);
+            } else {
+                // copy file và xóa file cũ
+                rename($file, $fileNameNew);
+                // unlink($file);
+            }
+        }
+
+        // xóa thư mục cũ
+        rmdir($from);
     }
 }
