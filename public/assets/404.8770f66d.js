@@ -1,0 +1,1 @@
+import{L as e}from"./Basic.f2285fe2.js";import{d as t,c as a,w as o,o as n,e as s}from"./index.47a2cba8.js";const r=s("p",null,"Trang kh\xF4ng T\u1ED3n t\u1EA1i!",-1),l=t({__name:"404",setup(c){return(_,u)=>(n(),a(e,null,{default:o(()=>[r]),_:1}))}});export{l as default};
