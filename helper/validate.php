@@ -38,7 +38,7 @@ class Validate {
             } else if (strlen($request[$key]) > 25) {
                 $res['msg'] = "{$name} Không được nhiều hơn 25 ký tự";
                 return false;
-            } elseif (preg_match('/^[A-Za-z0-9]+$/', strtolower($request[$key]))) {
+            } elseif (preg_match('/^[A-Za-z0-9-_]+$/', strtolower($request[$key]))) {
                 $request[$key] = strtolower($request[$key]);
                 return true;
             } else {
@@ -100,7 +100,7 @@ class Validate {
         }
 
         if (isset($request[$key])) {
-            if (preg_match('/^[A-Za-z0-9áàảãạăắặằẳẵâấầẩẫậđéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵÁÀẢÃẠĂẮẶẰẲẴÂẤẦẨẪẬĐÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ ]+$/', $request[$key])) {
+            if (preg_match('/^[A-Za-z0-9áàảãạăắặằẳẵâấầẩẫậđéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵÁÀẢÃẠĂẮẶẰẲẴÂẤẦẨẪẬĐÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ\-\: ]+$/', $request[$key])) {
                 return true;
             }
 
