@@ -1253,17 +1253,18 @@ class Home extends Controller
                         $path_file_info = "/ppt/info/{$session->id}.json";
                         if ($session->ppttype) {
                             $ppt_info = json_decode(Storage::get($path_file_info), 1);
+                            if ($ppt_info) {
+                                // xóa file ppt cũ
+                                $file_ppt = public_path('upload/ppt').'/'.$ppt_info['name'];
+                                if (is_file($file_ppt)) {
+                                    unlink($file_ppt);
+                                }
 
-                            // xóa file ppt cũ
-                            $file_ppt = public_path('upload/ppt').'/'.$ppt_info['name'];
-                            if (is_file($file_ppt)) {
-                                unlink($file_ppt);
-                            }
-
-                            // xóa folder ppt nếu đã process xong
-                            $folder_ppt = public_path('ppt').'/'.$ppt_info['idc'];
-                            if (is_dir($folder_ppt)) {
-                                App::deleteDir($folder_ppt);
+                                // xóa folder ppt nếu đã process xong
+                                $folder_ppt = public_path('ppt').'/'.$ppt_info['idc'];
+                                if (is_dir($folder_ppt)) {
+                                    App::deleteDir($folder_ppt);
+                                }
                             }
                         } else {
                             // cập nhật thông tin ppt
@@ -1291,19 +1292,19 @@ class Home extends Controller
                             }
 
                             $zip = new \ZipArchive;
-                            $res = $zip->open($path_file_zip);
-                            if ($res === TRUE) {
+                            $resZip = $zip->open($path_file_zip);
+                            if ($resZip === TRUE) {
                                 $zip->extractTo($folder_tmp);
                                 $zip->close();
 
                                 $validate = true;
-                                if (is_file($folder_tmp.'/index.html') && is_dir($folder_tmp.'/data.local-only')) {
+                                if (is_file($folder_tmp.'/index.html') && is_dir($folder_tmp.'/data')) {
                                     $folder_data = $folder_tmp;
                                 } else {
                                     $list_file_of_tmp = glob($folder_tmp.'/*');
                                     if (count($list_file_of_tmp) === 1) {
                                         $folder_data_tmp = $list_file_of_tmp[0];
-                                        if (is_dir($folder_data_tmp) && is_file($folder_data_tmp.'/index.html') && is_dir($folder_data_tmp.'/data.local-only')) {
+                                        if (is_dir($folder_data_tmp) && is_file($folder_data_tmp.'/index.html') && is_dir($folder_data_tmp.'/data')) {
                                             $folder_data = $folder_data_tmp;
                                         } else {
                                             $validate = false;
