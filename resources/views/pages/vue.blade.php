@@ -5,8 +5,8 @@
     <link rel="icon" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Harvard</title>
-    <script type="module" crossorigin src="/assets/index.e2ba9276.js"></script>
-    <link rel="stylesheet" href="/assets/index.4daf8228.css">
+    <script type="module" crossorigin src="/assets/index.bcd501c6.js"></script>
+    <link rel="stylesheet" href="/assets/index.a22b2060.css">
   </head>
   <body>
     <div id="app"></div>
