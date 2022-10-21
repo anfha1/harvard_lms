@@ -18,6 +18,7 @@ use App\Models\luser;
 use App\Models\lcourse;
 use App\Models\lsession;
 use App\Models\lsessionrole;
+use App\Models\lblog;
 
 class Home extends Controller
 {
@@ -736,9 +737,6 @@ class Home extends Controller
     }
 
     public function manage_course(Request $request) {
-        // giả lập đăng nhập
-        // $request->session()->put('id_user', 1);
-
         $info = App::CheckLogin($request);
         $res = App::Res([
             'courses' => [],
@@ -1521,6 +1519,218 @@ class Home extends Controller
             }
         }
         return $res;
+    }
+
+    // lấy tất cả các blog
+    public function manage_blog(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res([
+            'blogs' => [],
+        ]);
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) { // chỉ có quản trị viên mới vô đc
+                $list_blog = [];
+                foreach (lblog::all() as $blog) {
+                    $blog_info = [
+                        'id' => $blog->id,
+                        'name' => $blog->name,
+                        // 'slug' => $blog->slug,
+                        'photo' => $blog->photo,
+                        'description' => $blog->description,
+                        'status' => $blog->status,
+                        // 'user' => 'quản trị viên',
+                        // 'data' => '',
+                    ];
+
+                    // $data = Storage::get("/blog/{$blog->id}.txt");
+                    // if ($data) {
+                    //     $blog_info['data'] = $data;
+                    // }
+
+                    // $user_create = luser::select('id', 'name')->where('id', $blog->luser_id)->fisrt();
+                    // if ($user_create) {
+                    //     $blog_info['user'] = $user_create->name;
+                    // }
+
+                    $list_blog[] = $blog_info;
+
+                }
+
+                $res['blogs'] = $list_blog;
+                $res['status'] = 1;
+            } else {
+                $res['msg'] = 'Bạn không có quyền truy cập!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+        return App::response($res);
+    }
+
+    // Thêm blog
+    public function manage_blog_create(Request $request) {
+        $res = App::Res();
+        $info = App::CheckLogin($request);
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) {
+                if (Validate::name($res, $request->all(), 'name', 'Tiêu đề')) {
+                    // tiến hành tạo :))
+                    $blog = new lblog;
+                    $blog->name = $request->name;
+                    $blog->slug = Str::slug($request->name, '-');
+                    if (!empty($request->description)) {
+                        $blog->description = $request->description;
+                    }
+
+                    $res['test'] = $request->image;
+                    if ($request->file('image')) {
+                        $file = $request->file('image');
+                        $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                        $file->move(public_path('upload/photo'), $filename);
+                        $blog->photo = '/upload/photo/' . $filename;
+                    } else {
+                        $imgs = config('app.photo');
+                        $blog->photo = $imgs[rand(0, count($imgs)-1)];
+                    }
+
+                    $blog->save();
+                    // lưu lại data
+                    $path_file_info = "/blog/{$blog->id}.json";
+                    $data = '';
+                    if (!empty($request->data) && is_string($request->data)) {
+                        $data = $request->data;
+                    }
+                    Storage::put($path_file_info, $data);
+                    $res['status'] = 1;
+                    $res['msg'] = 'Đã tạo lớp thành công';
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+
+        return App::response($res);
+    }
+
+    // lấy data của blog
+    public function manage_blog_get_data(Request $request) {
+        $request_all = $request->all();
+        $res = App::Res();
+
+        if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    $blog = lblog::find($request_all['blog_id']);
+                    if ($blog) {
+                        // lấy data và trả về cho frontend
+                        $path_file_info = "/blog/{$request_all['blog_id']}.json";
+                        $data = Storage::get($path_file_info);
+                        if (empty($data)) {
+                            $data = '';
+                        }
+                        $res['status'] = 1;
+                        $res['data'] = $data;
+                    } else {
+                        $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                }
+            } else {
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
+            }
+        }
+
+        return App::response($res);
+    }
+
+    // show blog
+    public function manage_blog_show(Request $request) {
+        //
+    }
+
+    // tắt blog
+    public function manage_blog_off(Request $request) {
+        //
+    }
+
+    // sửa blog
+    public function manage_blog_edit(Request $request) {
+        $request_all = $request->all();
+        $res = App::Res();
+
+        if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    $blog = lblog::find($request_all['blog_id']);
+                    if ($blog) {
+                        $change = false;
+                        if (!empty($request->name) && $request->name != $blog->name) {
+                            if (Validate::name($res, $request->all(), 'name', 'Tên lớp')) {
+                                // Tạo slug
+                                $blog->name = $request->name;
+                                $blog->slug = Str::slug($request->name, '-');
+                                $change = true;
+                            }
+                        }
+
+                        if (!empty($request->description) && $request->description != $blog->description) {
+                            $blog->description = $request->description;
+                            $change = true;
+                        }
+
+                        if ($request->file('image')) {
+                            $file = $request->file('image');
+                            $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                            $file->move(public_path('upload/photo'), $filename);
+                            $blog->photo = '/upload/photo/' . $filename;
+                            $change = true;
+                        }
+
+                        $path_file_info = "/blog/{$blog->id}.json";
+                        $data = Storage::get($path_file_info);
+                        if (!empty($request->data) && is_string($request->data) && $request->data != $data) {
+                            Storage::put($path_file_info, $request->data);
+                            $change = true;
+                        }
+
+                        if ($change) {
+                            $blog->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã sửa lớp thành công';
+                        } else {
+                            $res['msg'] = 'Không có gì thay đổi!';
+                        }
+                    } else {
+                        $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                }
+            } else {
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
+            }
+        }
+
+        return App::response($res);
+    }
+
+    // xóa blog
+    public function manage_blog_delete(Request $request) {
+        //
     }
 
     // app giả để che mắt thôi

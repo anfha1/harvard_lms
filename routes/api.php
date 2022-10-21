@@ -127,6 +127,18 @@ Route::post('/manage/pdf/delete', [ControllersApiV1Home::class, 'manage_pdf_dele
 // đây là thông tin của pdf view
 Route::post('/loguseractivity/create-many-async',  [ControllersApiV1Home::class, 'loguseractivity']);
 
+// lấy danh sách blog
+Route::post('/manage/blog', [ControllersApiV1Home::class, 'manage_blog']);
+
+// lấy data blog
+Route::post('/manage/blog/get-data', [ControllersApiV1Home::class, 'manage_blog_get_data']);
+
+// tạo blog
+Route::post('/manage/blog/create', [ControllersApiV1Home::class, 'manage_blog_create']);
+
+// sửa blog
+Route::post('/manage/blog/edit', [ControllersApiV1Home::class, 'manage_blog_edit']);
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
