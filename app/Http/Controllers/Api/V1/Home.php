@@ -101,13 +101,14 @@ class Home extends Controller
 
     public function blog(Request $request) {
         $list_blog = [];
-        for ($i = 0; $i < 3; $i++) {
+        foreach (lblog::where('status', 1)->orderBy('id', 'desc')->get() as $blog) {
             $list_blog[] = [
-                'id' => $i,
-                'name' => 'Tin tức '.($i + 1),
-                'slug' => '',
-                'photo' => 'https://www.w3schools.com/w3css/img_lights.jpg',
-                'description' => '',
+                'id' => $blog->id,
+                'name' => $blog->name,
+                'slug' => $blog->slug,
+                'photo' => $blog->photo,
+                'description' => $blog->description,
+                'created_at' => $blog->created_at,
             ];
         }
         return App::response([
@@ -1531,7 +1532,7 @@ class Home extends Controller
         if ($info['status']) {
             if (App::auth($info['info_user'], 1)) { // chỉ có quản trị viên mới vô đc
                 $list_blog = [];
-                foreach (lblog::all() as $blog) {
+                foreach (lblog::all()->sortByDesc('id') as $blog) {
                     $blog_info = [
                         'id' => $blog->id,
                         'name' => $blog->name,
@@ -1631,7 +1632,7 @@ class Home extends Controller
                     $blog = lblog::find($request_all['blog_id']);
                     if ($blog) {
                         // lấy data và trả về cho frontend
-                        $path_file_info = "/blog/{$request_all['blog_id']}.json";
+                        $path_file_info = "/blog/{$request_all['blog_id']}.txt";
                         $data = Storage::get($path_file_info);
                         if (empty($data)) {
                             $data = '';
@@ -1639,7 +1640,7 @@ class Home extends Controller
                         $res['status'] = 1;
                         $res['data'] = $data;
                     } else {
-                        $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                        $res['msg'] = 'Tin tức không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
                 } else {
                     // không có quyền vô
@@ -1650,25 +1651,79 @@ class Home extends Controller
                 $res['check_login'] = 1;
             }
         }
-
         return App::response($res);
     }
 
     // show blog
     public function manage_blog_show(Request $request) {
-        //
+        $request_all = $request->all();
+        $res = App::Res();
+        if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    $blog = lblog::find($request_all['blog_id']);
+                    if ($blog) {
+                        if ($blog->status == 1) {
+                            $res['msg'] = 'Tin tức đang được hiển thị!';
+                        } else {
+                            $blog->status = 1;
+                            $blog->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã hiển thị tin tức!';
+                        }
+                    } else {
+                        $res['msg'] = 'Tin tức không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                }
+            } else {
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
+            }
+        }
+        return App::response($res);
     }
 
     // tắt blog
     public function manage_blog_off(Request $request) {
-        //
+        $request_all = $request->all();
+        $res = App::Res();
+        if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    $blog = lblog::find($request_all['blog_id']);
+                    if ($blog) {
+                        if ($blog->status == 1) {
+                            $blog->status = 0;
+                            $blog->save();
+                            $res['status'] = 1;
+                            $res['msg'] = 'Đã tắt hiển thị tin tức!';
+                        } else {
+                            $res['msg'] = 'Tin tức đang không hiển thị!';
+                        }
+                    } else {
+                        $res['msg'] = 'Tin tức không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                }
+            } else {
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
+            }
+        }
+        return App::response($res);
     }
 
     // sửa blog
     public function manage_blog_edit(Request $request) {
         $request_all = $request->all();
         $res = App::Res();
-
         if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
             $info = App::CheckLogin($request);
             if ($info['status']) {
@@ -1684,12 +1739,10 @@ class Home extends Controller
                                 $change = true;
                             }
                         }
-
                         if (!empty($request->description) && $request->description != $blog->description) {
                             $blog->description = $request->description;
                             $change = true;
                         }
-
                         if ($request->file('image')) {
                             $file = $request->file('image');
                             $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
@@ -1698,7 +1751,7 @@ class Home extends Controller
                             $change = true;
                         }
 
-                        $path_file_info = "/blog/{$blog->id}.json";
+                        $path_file_info = "/blog/{$blog->id}.txt";
                         $data = Storage::get($path_file_info);
                         if (!empty($request->data) && is_string($request->data) && $request->data != $data) {
                             Storage::put($path_file_info, $request->data);
@@ -1713,7 +1766,38 @@ class Home extends Controller
                             $res['msg'] = 'Không có gì thay đổi!';
                         }
                     } else {
-                        $res['msg'] = 'Lớp (khối) không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                        $res['msg'] = 'Tin tức không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
+                    }
+                } else {
+                    // không có quyền vô
+                    $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+                }
+            } else {
+                $res['msg'] = 'Vui lòng đăng nhập!';
+                $res['check_login'] = 1;
+            }
+        }
+        return App::response($res);
+    }
+
+    // xóa blog
+    public function manage_blog_delete(Request $request) {
+        $request_all = $request->all();
+        $res = App::Res();
+        if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
+            $info = App::CheckLogin($request);
+            if ($info['status']) {
+                if (App::auth($info['info_user'], 1)) {
+                    $blog = lblog::find($request_all['blog_id']);
+                    if ($blog) {
+                        // tiến hành xóa tin tức
+                        $path_file_info = "/blog/{$request_all['blog_id']}.txt";
+                        Storage::delete($path_file_info);
+                        $blog->delete();
+                        $res['msg'] = 'Đã xóa thành công!';
+                        $res['status'] = 1;
+                    } else {
+                        $res['msg'] = 'Tin tức không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
                 } else {
                     // không có quyền vô
@@ -1726,11 +1810,6 @@ class Home extends Controller
         }
 
         return App::response($res);
-    }
-
-    // xóa blog
-    public function manage_blog_delete(Request $request) {
-        //
     }
 
     // app giả để che mắt thôi
@@ -1788,5 +1867,39 @@ class Home extends Controller
 
         // xóa thư mục cũ
         rmdir($from);
+    }
+
+    public function ckfinderUpload(Request $request) {
+        $request_all = $request->all();
+        $res = App::Res([
+            'fileName' => '',
+            'uploaded' => 0,
+            'url' => '',
+        ]);
+
+        $info = App::CheckLogin($request);
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) {
+                if ($request->hasFile('upload')) {
+                    $file = $request->file('upload');
+                    $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                    $file->move(public_path('upload/blog'), $filename);
+                    $res['fileName'] = $filename;
+                    $res['uploaded'] = $res['status'] = 1;
+                    $res['url'] = '/upload/blog/' . $filename;
+                    $res['msg'] = 'Tải lên thành công';
+                } else {
+                    $res['msg'] = 'Bạn không có file tải lên!';
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+
+        return App::response($res);
     }
 }

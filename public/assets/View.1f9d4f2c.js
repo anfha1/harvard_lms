@@ -1,0 +1,1 @@
+import{L as e}from"./Basic.86cf6774.js";import{d as t,c as a,w as o,o as s,b as c}from"./index.c5b6a3a3.js";const n=c("h3",null,"Gi\u1EDBi thi\u1EC7u",-1),p=t({__name:"View",setup(r){return(i,u)=>(s(),a(e,null,{default:o(()=>[n]),_:1}))}});export{p as default};

@@ -130,6 +130,12 @@ Route::post('/loguseractivity/create-many-async',  [ControllersApiV1Home::class,
 // lấy danh sách blog
 Route::post('/manage/blog', [ControllersApiV1Home::class, 'manage_blog']);
 
+// hiển thị blog
+Route::post('/manage/blog/show', [ControllersApiV1Home::class, 'manage_blog_show']);
+
+// hiển thị blog
+Route::post('/manage/blog/off', [ControllersApiV1Home::class, 'manage_blog_off']);
+
 // lấy data blog
 Route::post('/manage/blog/get-data', [ControllersApiV1Home::class, 'manage_blog_get_data']);
 
@@ -139,6 +145,8 @@ Route::post('/manage/blog/create', [ControllersApiV1Home::class, 'manage_blog_cr
 // sửa blog
 Route::post('/manage/blog/edit', [ControllersApiV1Home::class, 'manage_blog_edit']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// hiển thị blog
+Route::post('/manage/blog/delete', [ControllersApiV1Home::class, 'manage_blog_delete']);
+
+// xử lý upload ảnh chỉ có quản trị viên mới có quyền up
+Route::post('ckfinder/upload', [ControllersApiV1Home::class, 'ckfinderUpload']);
