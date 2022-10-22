@@ -46,8 +46,14 @@ Route::post('/login', [ControllersApiV1Home::class, 'login']);
 // đăng xuất
 Route::post('/logout', [ControllersApiV1Home::class, 'logout']);
 
-// giải lập giả lập tin tức
+// lấy danh sách tin tức tin tức
 Route::post('/blog', [ControllersApiV1Home::class, 'blog']);
+
+// lấy danh sách tin tức tin tức lấy 2 bài
+Route::post('/blog1', [ControllersApiV1Home::class, 'blog1']);
+
+// Check quyền giới thiệu
+Route::post('/blog/role/check', [ControllersApiV1Home::class, 'blog_role_check']);
 
 // giải lập khối và lớp học
 Route::post('/course', [ControllersApiV1Home::class, 'course']);

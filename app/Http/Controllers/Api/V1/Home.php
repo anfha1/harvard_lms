@@ -118,6 +118,63 @@ class Home extends Controller
         ]);
     }
 
+    public function blog1(Request $request) {
+        $list_blog = [];
+        foreach (lblog::where('status', 1)->orderBy('id', 'desc')->limit(2)->get() as $blog) {
+            $list_blog[] = [
+                'id' => $blog->id,
+                'name' => $blog->name,
+                'slug' => $blog->slug,
+                'photo' => $blog->photo,
+                'description' => $blog->description,
+                'created_at' => $blog->created_at,
+            ];
+        }
+        return App::response([
+            'status' => '1',
+            'msg' => '',
+            'blogs' => $list_blog,
+        ]);
+    }
+
+    public function blog_role_check(Request $request) {
+        $res = App::Res([
+            'data' => '',
+        ]);
+        $blog = lblog::find((int)$request->blog_id);
+        if ($blog) {
+            if (
+                $blog->slug == $request->blog_slug &&
+                $blog->status == 1
+            ) {
+                // trả về thông tin để hiển thị
+                $res['status'] = 1;
+                $res['data'] = [
+                    'name' => $blog->name,
+                    'data' => '',
+                    'user' => 'Quản trị viên',
+                    'created_at' => $blog->created_at,
+                ];
+
+                $data = Storage::get("/blog/{$request->blog_id}.txt");
+                if ($data) {
+                    $res['data']['data'] = $data;
+                }
+
+                $user_create = luser::select('id', 'name')->where('id', $blog->luser_id)->first();
+                if ($user_create) {
+                    $res['data']['user'] = $user_create->name;
+                }
+            } else {
+                $res['msg'] = 'Tài liệu không tồn tại';
+            }
+        } else {
+            $res['msg'] = 'Tài liệu không tồn tại';
+        }
+
+        return App::response($res);
+    }
+
     public function course(Request $request) {
         // lấy thông tin đăng nhập
         $info = App::CheckLogin($request);
@@ -195,15 +252,17 @@ class Home extends Controller
                             }
                         }
                     }
+                    $list_session[] = $session_info;
                 }
-                $list_session[] = $session_info;
             }
-            $list_course[] = [
-                'id' => $course->id,
-                'name' => $course->name,
-                'photo' => $course->photo,
-                'sessions' => $list_session,
-            ];
+            if (count($list_session)) {
+                $list_course[] = [
+                    'id' => $course->id,
+                    'name' => $course->name,
+                    'photo' => $course->photo,
+                    'sessions' => $list_session,
+                ];
+            }
         }
 
         return App::response([
@@ -225,7 +284,7 @@ class Home extends Controller
                 $session_info->slug == $request->session_slug &&
                 $session_info->lcourse_id == $request->course_id
             ) {
-                $course_info = lcourse::select('slug')->where('id', $request->course_id)->get();
+                $course_info = lcourse::find($request->course_id);
                 if ($course_info->count() > 0 && $course_info->first()->slug == $request->course_slug) {
                     $info_ppt = json_decode(Storage::get("/ppt/info/{$request->session_id}.json"), 1);
                     if (isset($info_ppt['status']) && $info_ppt['status'] == 1) {
@@ -255,6 +314,8 @@ class Home extends Controller
 
                         if ($is_view) {
                             $res['status'] = 1;
+                            $res['course_name'] = $course_info->name;
+                            $res['session_name'] = $session_info->name;
                             $res['link'] = "/ppt/{$info_ppt['idc']}/{$request->session_id}";
                         } else {
                             if ($info['status']) {
@@ -1549,7 +1610,7 @@ class Home extends Controller
                     //     $blog_info['data'] = $data;
                     // }
 
-                    // $user_create = luser::select('id', 'name')->where('id', $blog->luser_id)->fisrt();
+                    // $user_create = luser::select('id', 'name')->where('id', $blog->luser_id)->first();
                     // if ($user_create) {
                     //     $blog_info['user'] = $user_create->name;
                     // }

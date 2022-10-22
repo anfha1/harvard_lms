@@ -7,8 +7,8 @@
     <title>Harvard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="https://ricostacruz.com/jquery.transit/jquery.transit.min.js"></script>
-    <script type="module" crossorigin src="/assets/index.c5b6a3a3.js"></script>
-    <link rel="stylesheet" href="/assets/index.523a6255.css">
+    <script type="module" crossorigin src="/assets/index.acca3e2b.js"></script>
+    <link rel="stylesheet" href="/assets/index.8c4e1389.css">
   </head>
   <body>
     <div id="app"></div>
@@ -21,7 +21,7 @@
           //option
           $this.id = "background_css3";
           $this.style = {
-            bubbles_color:"#0072ff1c",
+            bubbles_color:"#fff",
             stroke_width:0,
             stroke_color :"black"
           };
