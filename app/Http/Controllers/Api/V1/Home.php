@@ -285,7 +285,7 @@ class Home extends Controller
                 $session_info->lcourse_id == $request->course_id
             ) {
                 $course_info = lcourse::find($request->course_id);
-                if ($course_info->count() > 0 && $course_info->first()->slug == $request->course_slug) {
+                if ($course_info && $course_info->slug == $request->course_slug) {
                     $info_ppt = json_decode(Storage::get("/ppt/info/{$request->session_id}.json"), 1);
                     if (isset($info_ppt['status']) && $info_ppt['status'] == 1) {
                         // lấy thông tin đăng nhập
