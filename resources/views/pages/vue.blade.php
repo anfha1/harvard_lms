@@ -7,8 +7,8 @@
     <title>Harvard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="https://ricostacruz.com/jquery.transit/jquery.transit.min.js"></script>
-    <script type="module" crossorigin src="/assets/index.0afc0801.js"></script>
-    <link rel="stylesheet" href="/assets/index.8c4e1389.css">
+    <script type="module" crossorigin src="/assets/index.05094aa3.js"></script>
+    <link rel="stylesheet" href="/assets/index.5a02badf.css">
   </head>
   <body>
     <div id="app"></div>

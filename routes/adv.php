@@ -10,13 +10,13 @@ use App\Http\Controllers\View\Ppt as ControllersViewPpt;
 // Route::get('/pdf/{id_session}', [ControllersViewPdf::class, 'view'])->where('id_session', '[0-9]+');
 
 // hiển thị powerpoint
-Route::get('/ppt/{ppt_id}/{session_id}', [ControllersViewPpt::class, 'view'])
+Route::get('/ppt/{ppt_id}/{session_id}.html', [ControllersViewPpt::class, 'view'])
 ->name('ppt.view')
 ->where('ppt_id', '[0-9]+')
 ->where('session_id', '[0-9]+');
 
 // hiển thị tài liệu
-Route::get('/view/doc/{course_slug}/{course_id}/{session_slug}/{session_id}', [ControllersViewPdf::class, 'view'])
+Route::get('/view/doc/{course_slug}-{course_id}/{session_slug}-{session_id}.html', [ControllersViewPdf::class, 'view'])
 ->name('doc.view')
 ->where('course_slug', '[a-z0-9-]+')
 ->where('course_id', '[0-9]+')

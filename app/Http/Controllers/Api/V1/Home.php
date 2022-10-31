@@ -37,6 +37,8 @@ class Home extends Controller
                 'name' => $info['info_user']['name'],
                 'role' => $info['info_user']['role'],
                 'avatar' => $info['info_user']['photo'] ?? 'https://api.minimalavatars.com/avatar/random/png',
+                'school' => $info['info_user']['school'],
+                'course' => $info['info_user']['course'],
             ];
         } else {
             $res['info'] = [
@@ -44,6 +46,8 @@ class Home extends Controller
                 'role' => 0,
                 'name' => '',
                 'avatar' => '',
+                'school' => '',
+                'course' => '',
             ];
         }
 
@@ -248,7 +252,7 @@ class Home extends Controller
                             $info = json_decode($data, 1);
                             if ($info['status'] == 1) {
                                 $session_info['doc_type'] = 1;
-                                $session_info['doc_link'] = "/view/doc/{$course->slug}/{$course->id}/{$session->slug}/{$session->id}";
+                                $session_info['doc_link'] = "/view/doc/{$course->slug}-{$course->id}/{$session->slug}-{$session->id}.html";
                             }
                         }
                     }
@@ -316,7 +320,7 @@ class Home extends Controller
                             $res['status'] = 1;
                             $res['course_name'] = $course_info->name;
                             $res['session_name'] = $session_info->name;
-                            $res['link'] = "/ppt/{$info_ppt['idc']}/{$request->session_id}";
+                            $res['link'] = "/ppt/{$info_ppt['idc']}/{$request->session_id}.html";
                         } else {
                             if ($info['status']) {
                                 // không có quyền xem
@@ -361,6 +365,8 @@ class Home extends Controller
                         'status' => $user->status,
                         'role' => $user->role,
                         'tags' => json_decode($user->tags),
+                        'school' => $user->school ?: '',
+                        'course' => $user->course ?: '',
                     ];
                 }
                 $res['status'] = 1;
@@ -386,28 +392,34 @@ class Home extends Controller
                     if (Validate::password($res, $request_all)) {
                         if (Validate::role($res, $request_all)) {
                             if (Validate::name($res, $request_all, 'name', 'Tên hiển thị')) {
-                                // tiến hành tạo :))
-                                $luser = new luser;
-                                $luser->username = $request_all['username'];
-                                $luser->password = md5($request_all['password']);
-                                $luser->name = $request_all['name'];
-                                $luser->role = $request_all['role'];
+                                if (Validate::name($res, $request_all, 'school', 'Tên trường')) {
+                                    if (Validate::name($res, $request_all, 'course', 'Tên khối')) {
+                                        // tiến hành tạo :))
+                                        $luser = new luser;
+                                        $luser->username = $request_all['username'];
+                                        $luser->password = md5($request_all['password']);
+                                        $luser->name = $request_all['name'];
+                                        $luser->role = $request_all['role'];
+                                        $luser->school = $request_all['school'];
+                                        $luser->course = $request_all['course'];
 
-                                if ($request->file('avatar')) {
-                                    $file = $request->file('avatar');
-                                    $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-                                    $file->move(public_path('upload/photo'), $filename);
-                                    $luser->photo = '/upload/photo/' . $filename;
-                                } else {
-                                    $user = Str::slug($request_all['name'], '-');
-                                    $luser->photo = "https://avatars.dicebear.com/api/adventurer-neutral/{$user}.svg";
+                                        if ($request->file('avatar')) {
+                                            $file = $request->file('avatar');
+                                            $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                                            $file->move(public_path('upload/photo'), $filename);
+                                            $luser->photo = '/upload/photo/' . $filename;
+                                        } else {
+                                            $user = Str::slug($request_all['name'], '-');
+                                            $luser->photo = "https://avatars.dicebear.com/api/adventurer-neutral/{$user}.svg";
+                                        }
+
+                                        $luser->tags = $request->tags ?? json_encode([]);
+                                        $luser->save();
+
+                                        $res['status'] = 1;
+                                        $res['msg'] = 'Đã tạo tài khoản thành công';
+                                    }
                                 }
-
-                                $luser->tags = $request->tags ?? json_encode([]);
-                                $luser->save();
-
-                                $res['status'] = 1;
-                                $res['msg'] = 'Đã tạo tài khoản thành công';
                             }
                         }
                     }
@@ -462,6 +474,26 @@ class Home extends Controller
                             if (Validate::name($res, $request_all, 'name', 'Tên hiển thị')) {
                                 if ($request_all['name'] != $user->name) {
                                     $user->name = $request_all['name'];
+                                    $change = true;
+                                }
+                            } else {
+                                $next = false;
+                            }
+                        }
+                        if ($next && !empty($request->school)) {
+                            if (Validate::name($res, $request_all, 'school', 'Tên trường')) {
+                                if ($request_all['school'] != $user->school) {
+                                    $user->school = $request_all['school'];
+                                    $change = true;
+                                }
+                            } else {
+                                $next = false;
+                            }
+                        }
+                        if ($next && !empty($request->course)) {
+                            if (Validate::name($res, $request_all, 'course', 'Tên hiển thị')) {
+                                if ($request_all['course'] != $user->course) {
+                                    $user->course = $request_all['course'];
                                     $change = true;
                                 }
                             } else {
