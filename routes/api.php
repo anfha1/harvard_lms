@@ -151,8 +151,11 @@ Route::post('/manage/blog/create', [ControllersApiV1Home::class, 'manage_blog_cr
 // sửa blog
 Route::post('/manage/blog/edit', [ControllersApiV1Home::class, 'manage_blog_edit']);
 
-// hiển thị blog
+// xóa blog
 Route::post('/manage/blog/delete', [ControllersApiV1Home::class, 'manage_blog_delete']);
+
+// search category
+Route::post('/category/search', [ControllersApiV1Home::class, 'search_category']);
 
 // xử lý upload ảnh chỉ có quản trị viên mới có quyền up
 Route::post('ckfinder/upload', [ControllersApiV1Home::class, 'ckfinderUpload']);

@@ -19,6 +19,7 @@ use App\Models\lcourse;
 use App\Models\lsession;
 use App\Models\lsessionrole;
 use App\Models\lblog;
+use App\Models\lcategory;
 
 class Home extends Controller
 {
@@ -1669,7 +1670,7 @@ class Home extends Controller
         $info = App::CheckLogin($request);
 
         if ($info['status']) {
-            if (App::auth($info['info_user'], 1)) {
+            if (App::auth($info['info_user'], [1, 2])) {
                 if (Validate::name($res, $request->all(), 'name', 'Tiêu đề')) {
                     // tiến hành tạo :))
                     $blog = new lblog;
@@ -1721,7 +1722,7 @@ class Home extends Controller
         if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
             $info = App::CheckLogin($request);
             if ($info['status']) {
-                if (App::auth($info['info_user'], 1)) {
+                if (App::auth($info['info_user'], [1, 2])) {
                     $blog = lblog::find($request_all['blog_id']);
                     if ($blog) {
                         // lấy data và trả về cho frontend
@@ -1754,7 +1755,7 @@ class Home extends Controller
         if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
             $info = App::CheckLogin($request);
             if ($info['status']) {
-                if (App::auth($info['info_user'], 1)) {
+                if (App::auth($info['info_user'], [1, 2])) {
                     $blog = lblog::find($request_all['blog_id']);
                     if ($blog) {
                         if ($blog->status == 1) {
@@ -1787,7 +1788,7 @@ class Home extends Controller
         if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
             $info = App::CheckLogin($request);
             if ($info['status']) {
-                if (App::auth($info['info_user'], 1)) {
+                if (App::auth($info['info_user'], [1, 2])) {
                     $blog = lblog::find($request_all['blog_id']);
                     if ($blog) {
                         if ($blog->status == 1) {
@@ -1820,7 +1821,7 @@ class Home extends Controller
         if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
             $info = App::CheckLogin($request);
             if ($info['status']) {
-                if (App::auth($info['info_user'], 1)) {
+                if (App::auth($info['info_user'], [1, 2])) {
                     $blog = lblog::find($request_all['blog_id']);
                     if ($blog) {
                         $change = false;
@@ -1880,7 +1881,7 @@ class Home extends Controller
         if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
             $info = App::CheckLogin($request);
             if ($info['status']) {
-                if (App::auth($info['info_user'], 1)) {
+                if (App::auth($info['info_user'], [1, 2])) {
                     $blog = lblog::find($request_all['blog_id']);
                     if ($blog) {
                         // tiến hành xóa tin tức
@@ -1902,6 +1903,25 @@ class Home extends Controller
             }
         }
 
+        return App::response($res);
+    }
+
+    public function search_category(Request $request) {
+        // dùng để tìm kiếm catogory
+        $res = App::Res([
+            'list_category' => []
+        ]);
+        if (empty($request->key)) {
+            $res['msg'] = 'Từ khóa không được để trống';
+        } else {
+            $list_category = [];
+            $list_category_raw = lcategory::where('name', 'LIKE', "%{$request->key}%")->get();
+            foreach ($list_category_raw as $category) {
+                $list_category[] = $category->name;
+            }
+            $res['status'] = 1;
+            $res['list_category'] = $list_category;
+        }
         return App::response($res);
     }
 
