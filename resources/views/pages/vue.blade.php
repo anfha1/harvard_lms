@@ -5,13 +5,15 @@
     <link rel="icon" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Harvard</title>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="https://ricostacruz.com/jquery.transit/jquery.transit.min.js"></script>
-    <script type="module" crossorigin src="/assets/index.05094aa3.js"></script>
-    <link rel="stylesheet" href="/assets/index.5a02badf.css">
+    <script type="module" crossorigin src="/assets/index.f969e1ff.js"></script>
+    <link rel="stylesheet" href="/assets/index.2e57b170.css">
   </head>
   <body>
     <div id="app"></div>
+    
 
     <script>
       const animations = {

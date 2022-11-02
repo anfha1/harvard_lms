@@ -147,6 +147,7 @@ class Home extends Controller
     public function blog_role_check(Request $request) {
         $res = App::Res([
             'data' => '',
+            'list_blog' => [],
         ]);
         $blog = lblog::find((int)$request->blog_id);
         if ($blog) {
@@ -172,6 +173,48 @@ class Home extends Controller
                 if ($user_create) {
                     $res['data']['user'] = $user_create->name;
                 }
+
+                // Lấy danh sách category theo blog
+                $category = [];
+                $query_category = lblog_category::select('lcategorys_id')->where('lblog_id', $request->blog_id)->get();
+                if ($query_category->count() > 0) {
+                    foreach ($query_category as $category_tmp) {
+                        $category[] = $category_tmp->lcategorys_id;
+                    }
+                }
+
+                // lấy danh sách id của bài viết
+                if (count($category) > 0) {
+                    $query_category = lblog_category::select('lblog_id')
+                    ->whereIn('lcategorys_id', $category)
+                    ->whereNot('lblog_id', $request->blog_id)
+                    ->get();
+                    $category = [];
+                    if ($query_category->count() > 0) {
+                        foreach ($query_category as $category_tmp) {
+                            $category[] = $category_tmp->lblog_id;
+                        }
+                    }
+                }
+
+                // lấy thông tin bài viết
+                $list_blog = [];
+                if (count($category) > 0) {
+                    $query_category = lblog::where('status', 1)->whereIn('id', $category)->orderBy('id', 'desc')->limit(2)->get();
+                    if ($query_category->count() > 0) {
+                        foreach ($query_category as $blog) {
+                            $list_blog[] = [
+                                'id' => $blog->id,
+                                'name' => $blog->name,
+                                'slug' => $blog->slug,
+                                'photo' => $blog->photo,
+                                'description' => $blog->description,
+                                'created_at' => $blog->created_at,
+                            ];
+                        }
+                    }
+                }
+                $res['list_blog'] = $list_blog;
             } else {
                 $res['msg'] = 'Tài liệu không tồn tại';
             }
