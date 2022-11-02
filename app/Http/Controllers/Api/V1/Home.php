@@ -8,6 +8,7 @@ use Fai\Lib\Validate;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -20,6 +21,7 @@ use App\Models\lsession;
 use App\Models\lsessionrole;
 use App\Models\lblog;
 use App\Models\lcategory;
+use App\Models\lblog_category;
 
 class Home extends Controller
 {
@@ -1365,8 +1367,6 @@ class Home extends Controller
                             $session->save();
                         }
 
-                        $res['test'] = $file_exten;
-
                         if ($file_exten == 'zip') {
                             $ppt_info = $file_upload_info;
                             $path_file_zip = public_path('upload/ppt').'/'.$ppt_info['name'];
@@ -1680,7 +1680,6 @@ class Home extends Controller
                         $blog->description = $request->description;
                     }
 
-                    $res['test'] = $request->image;
                     if ($request->file('image')) {
                         $file = $request->file('image');
                         $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
@@ -1691,6 +1690,28 @@ class Home extends Controller
                         $blog->photo = $imgs[rand(0, count($imgs)-1)];
                     }
 
+                    $category = [];
+                    if (!empty($request->category)) {
+                        $category_tmp = json_decode($request->category, 1);
+                        if (is_array($category_tmp) && count($category_tmp) > 0) {
+                            foreach ($category_tmp as $category_elm) {
+                                if (is_string($category_elm) || is_numeric($category_elm)) {
+                                    // đọc từ db ra nếu có thì lưu lại id
+                                    $query_category = lcategory::select('id')->where('name', $category_elm)->get();
+                                    // nếu không có thì tạo mới
+                                    if ($query_category->count() > 0) {
+                                        $category[] = $query_category[0]->id;
+                                    } else {
+                                        $category_new = new lcategory;
+                                        $category_new->name = $category_elm;
+                                        $category_new->save();
+                                        $category[] = $category_new->id;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     $blog->save();
                     // lưu lại data
                     $path_file_info = "/blog/{$blog->id}.json";
@@ -1699,8 +1720,20 @@ class Home extends Controller
                         $data = $request->data;
                     }
                     Storage::put($path_file_info, $data);
+
+                    // thêm category cho blog
+                    if (count($category) > 0) {
+                        $data_insert = [];
+                        foreach ($category as $category_id) {
+                            $data_insert[] = [
+                                'lblog_id' => $blog->id,
+                                'lcategorys_id' => $category_id,
+                            ];
+                        }
+                        DB::table('lblog_categorys')->insert($data_insert);
+                    }
                     $res['status'] = 1;
-                    $res['msg'] = 'Đã tạo lớp thành công';
+                    $res['msg'] = 'Thêm tin tức thành công';
                 }
             } else {
                 // không có quyền vô
@@ -1717,7 +1750,10 @@ class Home extends Controller
     // lấy data của blog
     public function manage_blog_get_data(Request $request) {
         $request_all = $request->all();
-        $res = App::Res();
+        $res = App::Res([
+            'data' => '',
+            'list_category' => [],
+        ]);
 
         if (Validate::number($res, $request_all, 'blog_id', 'Tin tức')) {
             $info = App::CheckLogin($request);
@@ -1731,8 +1767,17 @@ class Home extends Controller
                         if (empty($data)) {
                             $data = '';
                         }
+                        // lấy danh sách category
+                        $category = [];
+                        $query_category = DB::table('lblog_categorys')->select('name')->where('lblog_id', $request_all['blog_id'])->join('lcategorys', 'lblog_categorys.lcategorys_id', '=', 'lcategorys.id')->get();
+                        if ($query_category->count() > 0) {
+                            foreach ($query_category as $category_tmp) {
+                                $category[] = $category_tmp->name;
+                            }
+                        }
                         $res['status'] = 1;
                         $res['data'] = $data;
+                        $res['list_category'] = $category;
                     } else {
                         $res['msg'] = 'Tin tức không tồn tại hoặc đã bị xóa vui lòng kiểm tra lại!';
                     }
@@ -1849,6 +1894,68 @@ class Home extends Controller
                         $data = Storage::get($path_file_info);
                         if (!empty($request->data) && is_string($request->data) && $request->data != $data) {
                             Storage::put($path_file_info, $request->data);
+                            $change = true;
+                        }
+
+                        // lấy danh sách category để kiểm tra
+                        $category = [];
+                        if (!empty($request->category)) {
+                            $category_tmp = json_decode($request->category, 1);
+                            if (is_array($category_tmp) && count($category_tmp) > 0) {
+                                foreach ($category_tmp as $category_elm) {
+                                    if (is_string($category_elm) || is_numeric($category_elm)) {
+                                        // đọc từ db ra nếu có thì lưu lại id
+                                        $query_category = lcategory::select('id')->where('name', $category_elm)->get();
+                                        // nếu không có thì tạo mới
+                                        if ($query_category->count() > 0) {
+                                            $category[] = $query_category[0]->id;
+                                        } else {
+                                            $category_new = new lcategory;
+                                            $category_new->name = $category_elm;
+                                            $category_new->save();
+                                            $category[] = $category_new->id;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // lấy category trong blog
+                        $category_old = [];
+                        $query_category = DB::table('lblog_categorys')->select('id', 'lcategorys_id')->where('lblog_id', $request_all['blog_id'])->get();
+                        $link_relationship = [];
+                        if ($query_category->count() > 0) {
+                            foreach ($query_category as $category_tmp) {
+                                $link_relationship[$category_tmp->lcategorys_id] = $category_tmp->id;
+                                $category_old[] = $category_tmp->lcategorys_id;
+                            }
+                        }
+
+                        // So sánh 2 danh sách để xem thằng nào xóa và thằng nào được thêm 
+                        $list_delete = array_diff($category_old, $category); // id của mối quan hệ giữa blog và category để còn xóa
+                        $list_add = array_diff($category, $category_old); // danh sách id những category cần thêm
+
+                        $res['test_1'] = [$category, $category_old];
+                        $res['test_2'] = [$list_delete, $list_add];
+
+                        if (count($list_delete) > 0) {
+                            $id_delete = [];
+                            foreach ($list_delete as $id) {
+                                $id_delete[] = $link_relationship[$id];
+                            }
+                            DB::table('lblog_categorys')->whereIn('id', $id_delete)->delete();
+                            $change = true;
+                        }
+
+                        if (count($list_add) > 0) {
+                            $data_insert = [];
+                            foreach ($list_add as $id) {
+                                $data_insert[] = [
+                                    'lblog_id' => $blog->id,
+                                    'lcategorys_id' => $id,
+                                ];
+                            }
+                            DB::table('lblog_categorys')->insert($data_insert);
                             $change = true;
                         }
 
