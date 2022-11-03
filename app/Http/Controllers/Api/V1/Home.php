@@ -2075,6 +2075,78 @@ class Home extends Controller
         return App::response($res);
     }
 
+    public function ckfinderUpload(Request $request) {
+        $res = App::Res([
+            'fileName' => '',
+            'uploaded' => 0,
+            'url' => '',
+        ]);
+
+        $info = App::CheckLogin($request);
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) {
+                if ($request->hasFile('upload')) {
+                    $file = $request->file('upload');
+                    $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                    $file->move(public_path('upload/blog'), $filename);
+                    $res['fileName'] = $filename;
+                    $res['uploaded'] = $res['status'] = 1;
+                    $res['url'] = '/upload/blog/' . $filename;
+                    $res['msg'] = 'Tải lên thành công';
+                } else {
+                    $res['msg'] = 'Bạn không có file tải lên!';
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+
+        return App::response($res);
+    }
+
+    public function tinyUpload(Request $request) {
+        $res = App::Res([
+            'fileName' => '',
+            'uploaded' => 0,
+            'url' => '',
+        ]);
+
+        // dd($request);
+
+        $info = App::CheckLogin($request);
+        if ($info['status']) {
+            if (App::auth($info['info_user'], [1, 2])) {
+                if ($request->hasFile('file')) {
+                    $file = $request->file('file');
+                    $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                    $file->move(public_path('upload/blog'), $filename);
+                    $res['fileName'] = $filename;
+                    $res['uploaded'] = $res['status'] = 1;
+                    $res['location'] = '/upload/blog/' . $filename;
+                    $res['msg'] = 'Tải lên thành công';
+                } else {
+                    $res['msg'] = 'Bạn không có file tải lên!';
+                }
+            } else {
+                // không có quyền vô
+                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+
+        if ($res['status']) {
+            return App::response($res);
+        } else {
+            return App::response($res, 400);
+        }
+    }
+
     // app giả để che mắt thôi
     public function loguseractivity(Request $request) {
         return App::response([
@@ -2083,6 +2155,7 @@ class Home extends Controller
         ]);
     }
 
+    // các hàm xử lý liên quan
     private function process_html($file) {
         $dom = new \DomDocument();
         libxml_use_internal_errors(true);
@@ -2130,39 +2203,5 @@ class Home extends Controller
 
         // xóa thư mục cũ
         rmdir($from);
-    }
-
-    public function ckfinderUpload(Request $request) {
-        $request_all = $request->all();
-        $res = App::Res([
-            'fileName' => '',
-            'uploaded' => 0,
-            'url' => '',
-        ]);
-
-        $info = App::CheckLogin($request);
-        if ($info['status']) {
-            if (App::auth($info['info_user'], 1)) {
-                if ($request->hasFile('upload')) {
-                    $file = $request->file('upload');
-                    $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-                    $file->move(public_path('upload/blog'), $filename);
-                    $res['fileName'] = $filename;
-                    $res['uploaded'] = $res['status'] = 1;
-                    $res['url'] = '/upload/blog/' . $filename;
-                    $res['msg'] = 'Tải lên thành công';
-                } else {
-                    $res['msg'] = 'Bạn không có file tải lên!';
-                }
-            } else {
-                // không có quyền vô
-                $res['msg'] = 'Xin lỗi bạn không có quyền để thực hiện chức năng này!';
-            }
-        } else {
-            $res['msg'] = 'Vui lòng đăng nhập!';
-            $res['check_login'] = 1;
-        }
-
-        return App::response($res);
     }
 }

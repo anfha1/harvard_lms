@@ -158,4 +158,7 @@ Route::post('/manage/blog/delete', [ControllersApiV1Home::class, 'manage_blog_de
 Route::post('/category/search', [ControllersApiV1Home::class, 'search_category']);
 
 // xử lý upload ảnh chỉ có quản trị viên mới có quyền up
-Route::post('ckfinder/upload', [ControllersApiV1Home::class, 'ckfinderUpload']);
+// Route::post('ckfinder/upload', [ControllersApiV1Home::class, 'ckfinderUpload']);
+
+// xử lý upload ảnh chỉ có quản trị viên mới có quyền up
+Route::post('tiny/upload', [ControllersApiV1Home::class, 'tinyUpload']);
