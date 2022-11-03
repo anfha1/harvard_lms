@@ -8,8 +8,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="https://ricostacruz.com/jquery.transit/jquery.transit.min.js"></script>
-    <script type="module" crossorigin src="/assets/index.4a7c2284.js"></script>
-    <link rel="stylesheet" href="/assets/index.2e57b170.css">
+    <script type="module" crossorigin src="/assets/index.6cd6420e.js"></script>
+    <link rel="stylesheet" href="/assets/index.7d5be196.css">
   </head>
   <body>
     <div id="app"></div>
