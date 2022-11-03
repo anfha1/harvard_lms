@@ -8,7 +8,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="https://ricostacruz.com/jquery.transit/jquery.transit.min.js"></script>
-    <script type="module" crossorigin src="/assets/index.6cd6420e.js"></script>
+    <script type="module" crossorigin src="/assets/index.4e0928db.js"></script>
     <link rel="stylesheet" href="/assets/index.7d5be196.css">
   </head>
   <body>
