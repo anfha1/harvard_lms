@@ -1757,7 +1757,7 @@ class Home extends Controller
 
                     $blog->save();
                     // lưu lại data
-                    $path_file_info = "/blog/{$blog->id}.json";
+                    $path_file_info = "/blog/{$blog->id}.txt";
                     $data = '';
                     if (!empty($request->data) && is_string($request->data)) {
                         $data = $request->data;
@@ -1978,9 +1978,6 @@ class Home extends Controller
                         $list_delete = array_diff($category_old, $category); // id của mối quan hệ giữa blog và category để còn xóa
                         $list_add = array_diff($category, $category_old); // danh sách id những category cần thêm
 
-                        $res['test_1'] = [$category, $category_old];
-                        $res['test_2'] = [$list_delete, $list_add];
-
                         if (count($list_delete) > 0) {
                             $id_delete = [];
                             foreach ($list_delete as $id) {
@@ -2056,6 +2053,7 @@ class Home extends Controller
         return App::response($res);
     }
 
+    // tìm kiếm chủ đề
     public function search_category(Request $request) {
         // dùng để tìm kiếm catogory
         $res = App::Res([
@@ -2075,6 +2073,7 @@ class Home extends Controller
         return App::response($res);
     }
 
+    // upload ảnh theo ckeditor
     public function ckfinderUpload(Request $request) {
         $res = App::Res([
             'fileName' => '',
@@ -2108,6 +2107,7 @@ class Home extends Controller
         return App::response($res);
     }
 
+    // upload ảnh theo tinyMCE
     public function tinyUpload(Request $request) {
         $res = App::Res([
             'fileName' => '',
