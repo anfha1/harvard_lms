@@ -58,6 +58,9 @@ Route::post('/blog/role/check', [ControllersApiV1Home::class, 'blog_role_check']
 // giải lập khối và lớp học
 Route::post('/course', [ControllersApiV1Home::class, 'course']);
 
+// sách và lớp học
+Route::post('/book', [ControllersApiV1Home::class, 'book']);
+
 // check quyền xem ppt
 Route::post('ppt/role/check', [ControllersApiV1Home::class, 'ppt_role_check']);
 
@@ -79,13 +82,19 @@ Route::post('/manage/user/lock', [ControllersApiV1Home::class, 'manage_user_lock
 // Xóa tài khoản
 Route::post('/manage/user/active', [ControllersApiV1Home::class, 'manage_user_active']);
 
-// lấy danh sách quyền
+// lấy danh sách quyền course
 Route::post('/manage/role/get', [ControllersApiV1Home::class, 'manage_role_get']);
 
-// cập nhật quyền tài khoản
+// cập nhật quyền tài khoản course
 Route::post('/manage/role/set', [ControllersApiV1Home::class, 'manage_role_set']);
 
-// lấy danh sách khóa học với trang thái quản trị viên
+// lấy danh sách quyền book
+Route::post('/manage/role/book/get', [ControllersApiV1Home::class, 'manage_role_book_get']);
+
+// cập nhật quyền tài khoản book
+Route::post('/manage/role/book/set', [ControllersApiV1Home::class, 'manage_role_book_set']);
+
+// lấy danh sách khóa học
 Route::post('/manage/course', [ControllersApiV1Home::class, 'manage_course']);
 
 // mở hiển thị lớp
@@ -156,6 +165,47 @@ Route::post('/manage/blog/delete', [ControllersApiV1Home::class, 'manage_blog_de
 
 // search category
 Route::post('/category/search', [ControllersApiV1Home::class, 'search_category']);
+
+// khu vực api của sách hướng dẫn kỹ năng sống
+
+// lấy danh sách khóa học của sách kỹ năng sống
+Route::post('/manage/book', [ControllersApiV1Home::class, 'manage_book']);
+
+// mở hiển thị lớp
+Route::post('/manage/book/show', [ControllersApiV1Home::class, 'manage_book_show']);
+
+// tắt hiển thị lớp
+Route::post('/manage/book/off', [ControllersApiV1Home::class, 'manage_book_off']);
+
+// tạo lớp | khối mới
+Route::post('/manage/book/create', [ControllersApiV1Home::class, 'manage_book_create']);
+
+// sửa lớp | khối
+Route::post('/manage/book/edit', [ControllersApiV1Home::class, 'manage_book_edit']);
+
+// xóa lớp
+Route::post('/manage/book/delete', [ControllersApiV1Home::class, 'manage_book_delete']);
+
+// tạo tiết mới
+Route::post('/manage/book/session/create', [ControllersApiV1Home::class, 'manage_book_session_create']);
+
+// sửa tiết
+Route::post('/manage/book/session/edit', [ControllersApiV1Home::class, 'manage_book_session_edit']);
+
+// mở hiển thị tiết
+Route::post('/manage/book/session/show', [ControllersApiV1Home::class, 'manage_book_session_show']);
+
+// tắt hiển thị tiết
+Route::post('/manage/book/session/off', [ControllersApiV1Home::class, 'manage_book_session_off']);
+
+// xóa tiết
+Route::post('/manage/book/session/delete', [ControllersApiV1Home::class, 'manage_book_session_delete']);
+
+// upload file pdf
+Route::post('/manage/book/pdf/upload', [ControllersApiV1Home::class, 'manage_book_pdf_upload']);
+
+// delete file pdf
+Route::post('/manage/book/pdf/delete', [ControllersApiV1Home::class, 'manage_book_pdf_delete']);
 
 // xử lý upload ảnh chỉ có quản trị viên mới có quyền up
 // Route::post('ckfinder/upload', [ControllersApiV1Home::class, 'ckfinderUpload']);

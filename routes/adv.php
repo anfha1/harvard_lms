@@ -23,6 +23,13 @@ Route::get('/view/doc/{course_slug}-{course_id}/{session_slug}-{session_id}.html
 ->where('session_slug', '[a-z0-9-]+')
 ->where('session_id', '[0-9]+');
 
+Route::get('/view/book/{course_slug}-{course_id}/{session_slug}-{session_id}.html', [ControllersViewPdf::class, 'book'])
+->name('book.view')
+->where('course_slug', '[a-z0-9-]+')
+->where('course_id', '[0-9]+')
+->where('session_slug', '[a-z0-9-]+')
+->where('session_id', '[0-9]+');
+
 // các request giả
 Route::post('/Base/CheckLangCookie', function() {
     return 'true';

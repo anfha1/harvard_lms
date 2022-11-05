@@ -21,23 +21,38 @@ class Pdf implements ShouldQueue
     private $path_file_info;
     private $file_upload_info;
     private $folder_pdf;
-
+    private $type;
     public $tries = 2;
+    private $public_ex;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($idc, $name, $path_file_info)
+    public function __construct($idc, $name, $path_file_info, $type = 0)
     {
+        $this->type = $type;
         $this->idc = $idc;
         $this->name = $name;
-        $this->path = public_path('upload/pdf').'/'.$name;
+        switch ($this->type) {
+            case 1: {
+                $this->path = public_path('upload/book').'/'.$name;
+                $folder_pdf = public_path('book');
+                $this->public_ex = '/book';
+                break;
+            }
+            default: {
+                $this->path = public_path('upload/pdf').'/'.$name;
+                $folder_pdf = public_path('pdf');
+                $this->public_ex = '/pdf';
+                break;
+            }
+        }
+        
         $this->path_file_info = $path_file_info;
         $this->file_upload_info = json_decode(Storage::get($path_file_info), 1);
 
-        $folder_pdf = public_path('pdf');
         if (!is_dir($folder_pdf)) {
             mkdir($folder_pdf);
         }
@@ -73,7 +88,7 @@ class Pdf implements ShouldQueue
                 if (is_file($this->folder_pdf."/bar_{$i}.jpg")) {
                     $name_file = 'page-'.$i.'-'.((int)(microtime(1)*1000)).'.jpg';
                     rename($this->folder_pdf."/bar_{$i}.jpg", $this->folder_pdf.'/'.$name_file);
-                    $list_file[] = "/pdf/{$this->idc}/$name_file";
+                    $list_file[] = $this->public_ex."/{$this->idc}/$name_file";
                 } else {
                     $status = false;
                     break;
@@ -115,7 +130,7 @@ class Pdf implements ShouldQueue
             $pdf->setPage($page);
             // $pdf->setColorspace(\Imagick::COLORSPACE_RGB)->setImageFormat('jpg');
             $pdf->saveImage("{$this->folder_pdf}/{$name_page}"); // lưu lại ảnh
-            $this->file_upload_info['list'][$i] =  "/pdf/{$this->idc}/$name_page";
+            $this->file_upload_info['list'][$i] =  $this->public_ex."/{$this->idc}/$name_page";
 
             $this->file_upload_info['process'] = $page;
             $this->update_status();
