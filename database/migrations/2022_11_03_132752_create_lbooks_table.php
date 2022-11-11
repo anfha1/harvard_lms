@@ -48,8 +48,6 @@ return new class extends Migration
 
             $table->integer('lbook_id')->foreign('lbook_id')->references('id')->on('lbooks')->onDelete('cascade'); // id của khối
             $table->timestamps();
-
-            // liên kết và thêm trình tự xóa
         });
 
         # Bảng quyền đối với tiết và sacus
