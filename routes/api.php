@@ -199,6 +199,92 @@ Route::prefix('manage')->group(function () {
         // delete file pdf
         Route::post('/pdf/delete', 'pdf_delete');
     });
+
+    Route::prefix('action')->controller(ControllersApiV1ManageAction::class)->group(function () {
+        // lấy danh sách lớp tư vấn học đường
+        Route::post('/', 'get');
+
+        // lấy danh sách quyền book
+        Route::post('/role/get', 'role_get');
+
+        // cập nhật quyền tài khoản book
+        Route::post('/role/set', 'role_set');
+
+        // mở hiển thị lớp
+        Route::post('/show', 'show');
+
+        // tắt hiển thị lớp
+        Route::post('/off', 'off');
+
+        // tạo lớp | khối mới
+        Route::post('/create', 'create');
+
+        // sửa lớp | khối
+        Route::post('/edit', 'edit');
+
+        // xóa lớp
+        Route::post('/delete', 'delete');
+
+        Route::prefix('session')->group(function () {
+            // tạo tiết mới
+            Route::post('/create', 'session_create');
+
+            // sửa tiết
+            Route::post('/edit', 'session_edit');
+
+            // mở hiển thị tiết
+            Route::post('/show', 'session_show');
+
+            // tắt hiển thị tiết
+            Route::post('/off', 'session_off');
+
+            // xóa tiết
+            Route::post('/delete', 'session_delete');
+        });
+    });
+
+    Route::prefix('advise')->controller(ControllersApiV1ManageAdvise::class)->group(function () {
+        // lấy danh sách lớp tư vấn học đường
+        Route::post('/', 'get');
+
+        // lấy danh sách quyền book
+        Route::post('/role/get', 'role_get');
+
+        // cập nhật quyền tài khoản book
+        Route::post('/role/set', 'role_set');
+
+        // mở hiển thị lớp
+        Route::post('/show', 'show');
+
+        // tắt hiển thị lớp
+        Route::post('/off', 'off');
+
+        // tạo lớp | khối mới
+        Route::post('/create', 'create');
+
+        // sửa lớp | khối
+        Route::post('/edit', 'edit');
+
+        // xóa lớp
+        Route::post('/delete', 'delete');
+
+        Route::prefix('session')->group(function () {
+            // tạo tiết mới
+            Route::post('/create', 'session_create');
+
+            // sửa tiết
+            Route::post('/edit', 'session_edit');
+
+            // mở hiển thị tiết
+            Route::post('/show', 'session_show');
+
+            // tắt hiển thị tiết
+            Route::post('/off', 'session_off');
+
+            // xóa tiết
+            Route::post('/delete', 'session_delete');
+        });
+    });
 });
 
 // đây là thông tin của pdf view
