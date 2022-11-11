@@ -130,7 +130,7 @@ class Home extends Controller
 
     public function blog1(Request $request) {
         $list_blog = [];
-        foreach (lblog::where('status', 1)->orderBy('id', 'desc')->limit(2)->get() as $blog) {
+        foreach (lblog::where('status', 1)->orderBy('id', 'desc')->limit(3)->get() as $blog) {
             $list_blog[] = [
                 'id' => $blog->id,
                 'name' => $blog->name,
@@ -1937,7 +1937,6 @@ class Home extends Controller
                     // }
 
                     $list_blog[] = $blog_info;
-
                 }
 
                 $res['blogs'] = $list_blog;

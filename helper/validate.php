@@ -112,6 +112,24 @@ class Validate {
         return false;
     }
 
+    public static function email(&$res, $request, $key='email', $name='Email') {
+        if (empty($name)) {
+            $name = $key;
+        }
+
+        if (isset($request[$key])) {
+            if (filter_var($request[$key], FILTER_VALIDATE_EMAIL)) {
+                return true;
+            }
+
+            $res['msg'] = "{$name} Không đúng định dạng";
+            return false;
+        }
+
+        $res['msg'] = "{$name} Không được để trống";
+        return false;
+    }
+
     public static function list_role(&$res, $request, $key='list_role', $name='Danh sách quyền') {
         if (empty($name)) {
             $name = $key;
