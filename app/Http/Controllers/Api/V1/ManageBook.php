@@ -34,7 +34,6 @@ class ManageBook extends Controller
                 foreach (lbook::all() as $course) {
                     $list_session = [];
                     foreach ($course->session()->get() as $session) {
-                        $ppt_status = 0;
                         $session_info = [
                             'id' => $session->id,
                             'name' => $session->name,
@@ -422,6 +421,27 @@ class ManageBook extends Controller
                         $listSesssion = lbook_session::select('id')->where('lbook_id', $request_all['course_id'])->get();
                         if ($listSesssion && $listSesssion->count() > 0) {
                             foreach ($listSesssion as $session) {
+                                // tiến hành xóa tài liệu
+                                $path_file_info = "/book/info/{$session->id}.json";
+                                $data = Storage::get($path_file_info);
+                                if ($data) {
+                                    $pdf_info = json_decode($data, 1);
+        
+                                    // xóa file pdf cũ
+                                    $file_pdf = public_path('upload/book').'/'.$pdf_info['name'];
+                                    if (is_file($file_pdf)) {
+                                        unlink($file_pdf);
+                                    }
+        
+                                    // xóa folder pdf nếu đã process xong
+                                    $folder_pdf = public_path('book').'/'.$pdf_info['idc'];
+                                    if (is_dir($folder_pdf)) {
+                                        App::deleteDir($folder_pdf);
+                                    }
+                                    Storage::delete($path_file_info);
+                                }
+        
+                                // xóa quyền
                                 lbook_session_role::where('lbook_session_id', $session->id)->delete();
                             }
                         }
@@ -637,7 +657,30 @@ class ManageBook extends Controller
                     // tiến hành tạo :))
                     $session = lbook_session::find($request_all['session_id']);
                     if ($session) {
+                        // tiến hành xóa tài liệu
+                        $path_file_info = "/book/info/{$session->id}.json";
+                        $data = Storage::get($path_file_info);
+                        if ($data) {
+                            $pdf_info = json_decode($data, 1);
+
+                            // xóa file pdf cũ
+                            $file_pdf = public_path('upload/book').'/'.$pdf_info['name'];
+                            if (is_file($file_pdf)) {
+                                unlink($file_pdf);
+                            }
+
+                            // xóa folder pdf nếu đã process xong
+                            $folder_pdf = public_path('book').'/'.$pdf_info['idc'];
+                            if (is_dir($folder_pdf)) {
+                                App::deleteDir($folder_pdf);
+                            }
+                            Storage::delete($path_file_info);
+                        }
+
+                        // xóa quyền
                         lbook_session_role::where('lbook_session_id', $session->id)->delete();
+
+                        // xóa tiết
                         $session->delete();
                         $res['status'] = 1;
                         $res['msg'] = 'Đã tạo sách thành công';

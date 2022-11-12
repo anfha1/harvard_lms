@@ -33,7 +33,6 @@ class ManageCourse extends Controller {
                 foreach (lcourse::all() as $course) {
                     $list_session = [];
                     foreach ($course->session()->get() as $session) {
-                        $ppt_status = 0;
                         $session_info = [
                             'id' => $session->id,
                             'name' => $session->name,
@@ -429,13 +428,51 @@ class ManageCourse extends Controller {
             $info = App::CheckLogin($request);
             if ($info['status']) {
                 if (App::auth($info['info_user'], 1)) {
-
-                    // tiến hành tạo :))
                     $course = lcourse::find($request_all['course_id']);
                     if ($course) {
                         $listSesssion = lsession::select('id')->where('lcourse_id', $request_all['course_id'])->get();
                         if ($listSesssion && $listSesssion->count() > 0) {
                             foreach ($listSesssion as $session) {
+                                // tiến hành xóa tài liệu
+                                $path_file_info = "/ppt/info/{$session->id}.json";
+                                $data = Storage::get($path_file_info);
+                                if ($data) {
+                                    $ppt_info = json_decode($data, 1);
+        
+                                    // xóa file ppt cũ
+                                    $file_ppt = public_path('upload/ppt').'/'.$ppt_info['name'];
+                                    if (is_file($file_ppt)) {
+                                        unlink($file_ppt);
+                                    }
+        
+                                    // xóa folder ppt nếu đã process xong
+                                    $folder_ppt = public_path('ppt').'/'.$ppt_info['idc'];
+                                    if (is_dir($folder_ppt)) {
+                                        App::deleteDir($folder_ppt);
+                                    }
+                                    Storage::delete($path_file_info);
+                                }
+        
+                                $path_file_info = "/pdf/info/{$session->id}.json";
+                                $data = Storage::get($path_file_info);
+                                if ($data) {
+                                    $pdf_info = json_decode($data, 1);
+        
+                                    // xóa file pdf cũ
+                                    $file_pdf = public_path('upload/pdf').'/'.$pdf_info['name'];
+                                    if (is_file($file_pdf)) {
+                                        unlink($file_pdf);
+                                    }
+        
+                                    // xóa folder pdf nếu đã process xong
+                                    $folder_pdf = public_path('pdf').'/'.$pdf_info['idc'];
+                                    if (is_dir($folder_pdf)) {
+                                        App::deleteDir($folder_pdf);
+                                    }
+                                    Storage::delete($path_file_info);
+                                }
+        
+                                // xóa quyền
                                 lsessionrole::where('lsession_id', $session->id)->delete();
                             }
                         }
@@ -653,7 +690,49 @@ class ManageCourse extends Controller {
                     // tiến hành tạo :))
                     $session = lsession::find($request_all['session_id']);
                     if ($session) {
+                        // tiến hành xóa tài liệu
+                        $path_file_info = "/ppt/info/{$session->id}.json";
+                        $data = Storage::get($path_file_info);
+                        if ($data) {
+                            $ppt_info = json_decode($data, 1);
+
+                            // xóa file ppt cũ
+                            $file_ppt = public_path('upload/ppt').'/'.$ppt_info['name'];
+                            if (is_file($file_ppt)) {
+                                unlink($file_ppt);
+                            }
+
+                            // xóa folder ppt nếu đã process xong
+                            $folder_ppt = public_path('ppt').'/'.$ppt_info['idc'];
+                            if (is_dir($folder_ppt)) {
+                                App::deleteDir($folder_ppt);
+                            }
+                            Storage::delete($path_file_info);
+                        }
+
+                        $path_file_info = "/pdf/info/{$session->id}.json";
+                        $data = Storage::get($path_file_info);
+                        if ($data) {
+                            $pdf_info = json_decode($data, 1);
+
+                            // xóa file pdf cũ
+                            $file_pdf = public_path('upload/pdf').'/'.$pdf_info['name'];
+                            if (is_file($file_pdf)) {
+                                unlink($file_pdf);
+                            }
+
+                            // xóa folder pdf nếu đã process xong
+                            $folder_pdf = public_path('pdf').'/'.$pdf_info['idc'];
+                            if (is_dir($folder_pdf)) {
+                                App::deleteDir($folder_pdf);
+                            }
+                            Storage::delete($path_file_info);
+                        }
+
+                        // xóa quyền
                         lsessionrole::where('lsession_id', $session->id)->delete();
+
+                        // xóa session
                         $session->delete();
                         $res['status'] = 1;
                         $res['msg'] = 'Đã tạo tiết thành công';
@@ -775,7 +854,7 @@ class ManageCourse extends Controller {
                                         mkdir($folder);
                                     }
 
-                                    $this->cut_folder($folder_data, $folder);
+                                    App::cutDir($folder_data, $folder);
                                     $ppt_info['data'] = $dataRender;
                                     $ppt_info['status'] = 1;
                                     Storage::put($path_file_info, json_encode($ppt_info));
@@ -966,28 +1045,5 @@ class ManageCourse extends Controller {
             }
         }
         return $res;
-    }
-
-    private function cut_folder($from, $to) {
-        foreach(glob($from.'/*') as $file) {
-            $fileName = preg_replace('/^'.preg_quote($from, '/').'\//', '', $file);
-            $fileNameNew = $to.'/'.$fileName;
-
-            if (is_dir($file)) {
-                // tạo thư mục
-                if (!is_dir($fileNameNew)) {
-                    mkdir($fileNameNew);
-                }
-                // tiếp tục cut thưu mục bên trong
-                $this->cut_folder($file, $fileNameNew);
-            } else {
-                // copy file và xóa file cũ
-                rename($file, $fileNameNew);
-                // unlink($file);
-            }
-        }
-
-        // xóa thư mục cũ
-        rmdir($from);
     }
 }

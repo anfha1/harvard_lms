@@ -40,14 +40,26 @@ Route::post('/blog1', [ControllersApiV1Home::class, 'blog1']);
 // Check quyền giới thiệu
 Route::post('/blog/role/check', [ControllersApiV1Home::class, 'blog_role_check']);
 
-// giải lập khối và lớp học
+// lấy danh sách giáo trình để hiển thị ở trang chủ
 Route::post('/course', [ControllersApiV1Home::class, 'course']);
 
-// sách và lớp học
+// check quyền xem ppt
+Route::post('ppt/role/check', [ControllersApiV1Home::class, 'course_get_ppt_data']);
+
+// lấy danh sách sách kỹ năng để hiển thị ở trang chủ
 Route::post('/book', [ControllersApiV1Home::class, 'book']);
 
-// check quyền xem ppt
-Route::post('ppt/role/check', [ControllersApiV1Home::class, 'ppt_role_check']);
+// lấy danh sách hoạt động trải nghiệm để hiển thị ở trang chủ
+Route::post('/action', [ControllersApiV1Home::class, 'action']);
+
+// check quyền xem tài liệu
+Route::post('action/get-data', [ControllersApiV1Home::class, 'action_get_data']);
+
+// lấy danh sách tư vấn học đường để hiển thị ở trang chủ
+Route::post('/advise', [ControllersApiV1Home::class, 'advise']);
+
+// check quyền xem tài liệu
+Route::post('advise/get-data', [ControllersApiV1Home::class, 'advise_get_data']);
 
 // search category
 Route::post('/category/search', [ControllersApiV1Home::class, 'search_category']);

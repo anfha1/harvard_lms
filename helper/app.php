@@ -68,4 +68,27 @@ class App {
             return ((int)$info['role']) === $role;
         }
     }
+
+    public static function cutDir($from, $to) {
+        foreach(glob($from.'/*') as $file) {
+            $fileName = preg_replace('/^'.preg_quote($from, '/').'\//', '', $file);
+            $fileNameNew = $to.'/'.$fileName;
+
+            if (is_dir($file)) {
+                // tạo thư mục
+                if (!is_dir($fileNameNew)) {
+                    mkdir($fileNameNew);
+                }
+                // tiếp tục cut thưu mục bên trong
+                self::cut_folder($file, $fileNameNew);
+            } else {
+                // copy file và xóa file cũ
+                rename($file, $fileNameNew);
+                // unlink($file);
+            }
+        }
+
+        // xóa thư mục cũ
+        rmdir($from);
+    }
 }

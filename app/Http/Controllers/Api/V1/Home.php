@@ -15,14 +15,25 @@ use Illuminate\Support\Str;
 use App\Jobs\Pdf;
 
 use App\Models\luser;
-use App\Models\lcourse;
-use App\Models\lsession;
-use App\Models\lsessionrole;
+
 use App\Models\lblog;
 use App\Models\lcategory;
 use App\Models\lblog_category;
+
+use App\Models\lcourse;
+use App\Models\lsession;
+use App\Models\lsessionrole;
+
 use App\Models\lbook;
 use App\Models\lbook_session_role;
+
+use App\Models\laction;
+use App\Models\laction_session;
+use App\Models\laction_session_role;
+
+use App\Models\ladvise;
+use App\Models\ladvise_session;
+use App\Models\ladvise_session_role;
 
 class Home extends Controller
 {
@@ -323,6 +334,76 @@ class Home extends Controller
         ]);
     }
 
+    public function course_get_ppt_data(Request $request) {
+        $res = App::Res([
+            'link' => '',
+        ]);
+        $session_info = lsession::select('slug', 'name', 'ppttype', 'lcourse_id')->where('id', $request->session_id)->get();
+        if ($session_info->count() > 0) {
+            $session_info = $session_info->first();
+            if (
+                $session_info->ppttype == 1 &&
+                $session_info->slug == $request->session_slug &&
+                $session_info->lcourse_id == $request->course_id
+            ) {
+                $course_info = lcourse::find($request->course_id);
+                if ($course_info && $course_info->slug == $request->course_slug) {
+                    $info_ppt = json_decode(Storage::get("/ppt/info/{$request->session_id}.json"), 1);
+                    if (isset($info_ppt['status']) && $info_ppt['status'] == 1) {
+                        // lấy thông tin đăng nhập
+                        $info = App::CheckLogin($request);
+                        $check_role = true;
+                        if ($info['status']) {
+                            $id_user = $info['info_user']['id'];
+                            if ((int)$info['info_user']['role'] === 1) {
+                                $check_role = false;
+                            }
+                        } else {
+                            $id_user = 0;
+                        }
+
+                        if ($check_role) {
+                            // check xem có quyền xem hay không?
+                            $list_role = lsessionrole::select('id')->where('luser_id', $id_user)->where('lsession_id', $request->session_id)->get();
+                            if ($list_role->count() > 0) {
+                                $is_view = true;
+                            } else {
+                                $is_view = false;
+                            }
+                        } else {
+                            $is_view = true;
+                        }
+
+                        if ($is_view) {
+                            $res['status'] = 1;
+                            $res['course_name'] = $course_info->name;
+                            $res['session_name'] = $session_info->name;
+                            $res['link'] = "/ppt/{$info_ppt['idc']}/{$request->session_id}.html";
+                        } else {
+                            if ($info['status']) {
+                                // không có quyền xem
+                                $res['msg'] =  'Tài liệu bị khóa - bạn không có quyền xem!';
+                            } else {
+                                // yêu cầu đăng nhập
+                                $res['msg'] =  'Vui lòng đăng nhập!';
+                            }
+                        }
+                    } else {
+                        $res['msg'] = 'Tài liệu không tồn tại';
+                    }
+                } else {
+                    $res['msg'] = 'Tài liệu không tồn tại';
+                }
+            } else {
+                $res['msg'] = 'Tài liệu không tồn tại';
+            }
+        } else {
+            $res['msg'] = 'Tài liệu không tồn tại';
+        }
+
+        return App::response($res);
+    }
+
     public function book(Request $request) {
         // lấy thông tin đăng nhập
         $info = App::CheckLogin($request);
@@ -403,62 +484,286 @@ class Home extends Controller
         ]);
     }
 
-    public function ppt_role_check(Request $request) {
-        $res = App::Res([
-            'link' => '',
+    public function action(Request $request) {
+        // lấy thông tin đăng nhập
+        $info = App::CheckLogin($request);
+        $check_role = true;
+        if ($info['status']) {
+            $id_user = $info['info_user']['id'];
+            if ((int)$info['info_user']['role'] === 1) {
+                $check_role = false;
+            }
+        } else {
+            $id_user = 0;
+        }
+
+        if ($check_role) {
+            // lấy danh sách quyền đang có
+            $list_role = laction_session_role::select('lbook_session_id')->where('luser_id', $id_user)->get();
+            if ($list_role->count() > 0) {
+                $list_role_tmp = [];
+                foreach ($list_role as $role) {
+                    $list_role_tmp[] = $role->lbook_session_id;
+                }
+                $list_role = $list_role_tmp;
+            } else {
+                $list_role = [];
+            }
+        }
+
+        $list_course = [];
+        foreach (laction::where('status', 1)->get() as $course) {
+            $list_session = [];
+            foreach ($course->session()->where('status', 1)->get() as $session) {
+                $ppt_status = 0;
+                if ($check_role) {
+                    if (in_array($session->id, $list_role)) {
+                        $lock = 0;
+                    } else {
+                        $lock = 1;
+                    }
+                } else {
+                    $lock = 0;
+                }
+                $session_info = [
+                    'id' => $session->id,
+                    'name' => $session->name,
+                    'description' => $session->description,
+                    'photo' => $session->photo,
+                    'slug' => $session->slug,
+                    'lock' => $lock,
+                ];
+                if (!$lock) {
+                    if ($session->doctype == 1) {
+                        $data = Storage::get("/book/info/{$session->id}.json");
+                        if ($data) {
+                            $info = json_decode($data, 1);
+                            if ($info['status'] == 1) {
+                                $session_info['doc_type'] = 1;
+                            }
+                        }
+                    }
+                    $list_session[] = $session_info;
+                }
+            }
+            if (count($list_session)) {
+                $list_course[] = [
+                    'id' => $course->id,
+                    'name' => $course->name,
+                    'photo' => $course->photo,
+                    'sessions' => $list_session,
+                    'slug' => $course->slug,
+                ];
+            }
+        }
+
+        return App::response([
+            'status' => 1,
+            'msg' => '',
+            'courses' => $list_course,
         ]);
-        $session_info = lsession::select('slug', 'name', 'ppttype', 'lcourse_id')->where('id', $request->session_id)->get();
+    }
+
+    public function action_get_data(Request $request) {
+        $res = App::Res([
+            'data' => '',
+        ]);
+        $session_info = laction_session::select('slug', 'name', 'laction_id')->where('id', $request->session_id)->get();
         if ($session_info->count() > 0) {
             $session_info = $session_info->first();
             if (
-                $session_info->ppttype == 1 &&
                 $session_info->slug == $request->session_slug &&
-                $session_info->lcourse_id == $request->course_id
+                $session_info->laction_id == $request->course_id
             ) {
-                $course_info = lcourse::find($request->course_id);
-                if ($course_info && $course_info->slug == $request->course_slug) {
-                    $info_ppt = json_decode(Storage::get("/ppt/info/{$request->session_id}.json"), 1);
-                    if (isset($info_ppt['status']) && $info_ppt['status'] == 1) {
-                        // lấy thông tin đăng nhập
-                        $info = App::CheckLogin($request);
-                        $check_role = true;
-                        if ($info['status']) {
-                            $id_user = $info['info_user']['id'];
-                            if ((int)$info['info_user']['role'] === 1) {
-                                $check_role = false;
-                            }
-                        } else {
-                            $id_user = 0;
-                        }
-
-                        if ($check_role) {
-                            // check xem có quyền xem hay không?
-                            $list_role = lsessionrole::select('id')->where('luser_id', $id_user)->where('lsession_id', $request->session_id)->get();
-                            if ($list_role->count() > 0) {
-                                $is_view = true;
-                            } else {
-                                $is_view = false;
-                            }
-                        } else {
-                            $is_view = true;
-                        }
-
-                        if ($is_view) {
-                            $res['status'] = 1;
-                            $res['course_name'] = $course_info->name;
-                            $res['session_name'] = $session_info->name;
-                            $res['link'] = "/ppt/{$info_ppt['idc']}/{$request->session_id}.html";
-                        } else {
-                            if ($info['status']) {
-                                // không có quyền xem
-                                $res['msg'] =  'Tài liệu bị khóa - bạn không có quyền xem!';
-                            } else {
-                                // yêu cầu đăng nhập
-                                $res['msg'] =  'Vui lòng đăng nhập!';
-                            }
+                $course_info = laction::find($request->course_id);
+                if (
+                    $course_info &&
+                    $course_info->slug == $request->course_slug
+                ) {
+                    // lấy thông tin đăng nhập
+                    $info = App::CheckLogin($request);
+                    $check_role = true;
+                    if ($info['status']) {
+                        $id_user = $info['info_user']['id'];
+                        if ((int)$info['info_user']['role'] === 1) {
+                            $check_role = false;
                         }
                     } else {
-                        $res['msg'] = 'Tài liệu không tồn tại';
+                        $id_user = 0;
+                    }
+
+                    if ($check_role) {
+                        // check xem có quyền xem hay không?
+                        $list_role = laction_session_role::select('id')->where('luser_id', $id_user)->where('laction_session_id', $request->session_id)->get();
+                        if ($list_role->count() > 0) {
+                            $is_view = true;
+                        } else {
+                            $is_view = false;
+                        }
+                    } else {
+                        $is_view = true;
+                    }
+
+                    if ($is_view) {
+                        $res['status'] = 1;
+                        $res['course_name'] = $course_info->name;
+                        $res['session_name'] = $session_info->name;
+                        $res['data'] = Storage::get("/action/{$session->id}.txt");;
+                    } else {
+                        if ($info['status']) {
+                            // không có quyền xem
+                            $res['msg'] =  'Tài liệu bị khóa - bạn không có quyền xem!';
+                        } else {
+                            // yêu cầu đăng nhập
+                            $res['msg'] =  'Vui lòng đăng nhập!';
+                        }
+                    }
+                } else {
+                    $res['msg'] = 'Tài liệu không tồn tại';
+                }
+            } else {
+                $res['msg'] = 'Tài liệu không tồn tại';
+            }
+        } else {
+            $res['msg'] = 'Tài liệu không tồn tại';
+        }
+
+        return App::response($res);
+    }
+
+    public function advise(Request $request) {
+        // lấy thông tin đăng nhập
+        $info = App::CheckLogin($request);
+        $check_role = true;
+        if ($info['status']) {
+            $id_user = $info['info_user']['id'];
+            if ((int)$info['info_user']['role'] === 1) {
+                $check_role = false;
+            }
+        } else {
+            $id_user = 0;
+        }
+
+        if ($check_role) {
+            // lấy danh sách quyền đang có
+            $list_role = laction_session_role::select('lbook_session_id')->where('luser_id', $id_user)->get();
+            if ($list_role->count() > 0) {
+                $list_role_tmp = [];
+                foreach ($list_role as $role) {
+                    $list_role_tmp[] = $role->lbook_session_id;
+                }
+                $list_role = $list_role_tmp;
+            } else {
+                $list_role = [];
+            }
+        }
+
+        $list_course = [];
+        foreach (laction::where('status', 1)->get() as $course) {
+            $list_session = [];
+            foreach ($course->session()->where('status', 1)->get() as $session) {
+                $ppt_status = 0;
+                if ($check_role) {
+                    if (in_array($session->id, $list_role)) {
+                        $lock = 0;
+                    } else {
+                        $lock = 1;
+                    }
+                } else {
+                    $lock = 0;
+                }
+                $session_info = [
+                    'id' => $session->id,
+                    'name' => $session->name,
+                    'description' => $session->description,
+                    'photo' => $session->photo,
+                    'slug' => $session->slug,
+                    'lock' => $lock,
+                ];
+                if (!$lock) {
+                    if ($session->doctype == 1) {
+                        $data = Storage::get("/book/info/{$session->id}.json");
+                        if ($data) {
+                            $info = json_decode($data, 1);
+                            if ($info['status'] == 1) {
+                                $session_info['doc_type'] = 1;
+                            }
+                        }
+                    }
+                    $list_session[] = $session_info;
+                }
+            }
+            if (count($list_session)) {
+                $list_course[] = [
+                    'id' => $course->id,
+                    'name' => $course->name,
+                    'photo' => $course->photo,
+                    'sessions' => $list_session,
+                    'slug' => $course->slug,
+                ];
+            }
+        }
+
+        return App::response([
+            'status' => 1,
+            'msg' => '',
+            'courses' => $list_course,
+        ]);
+    }
+
+    public function advise_get_data(Request $request) {
+        $res = App::Res([
+            'data' => '',
+        ]);
+        $session_info = ladvise_session::select('slug', 'name', 'ladvise_id')->where('id', $request->session_id)->get();
+        if ($session_info->count() > 0) {
+            $session_info = $session_info->first();
+            if (
+                $session_info->slug == $request->session_slug &&
+                $session_info->ladvise_id == $request->course_id
+            ) {
+                $course_info = ladvise::find($request->course_id);
+                if (
+                    $course_info &&
+                    $course_info->slug == $request->course_slug
+                ) {
+                    // lấy thông tin đăng nhập
+                    $info = App::CheckLogin($request);
+                    $check_role = true;
+                    if ($info['status']) {
+                        $id_user = $info['info_user']['id'];
+                        if ((int)$info['info_user']['role'] === 1) {
+                            $check_role = false;
+                        }
+                    } else {
+                        $id_user = 0;
+                    }
+
+                    if ($check_role) {
+                        // check xem có quyền xem hay không?
+                        $list_role = ladvise_session_role::select('id')->where('luser_id', $id_user)->where('ladvise_session_id', $request->session_id)->get();
+                        if ($list_role->count() > 0) {
+                            $is_view = true;
+                        } else {
+                            $is_view = false;
+                        }
+                    } else {
+                        $is_view = true;
+                    }
+
+                    if ($is_view) {
+                        $res['status'] = 1;
+                        $res['course_name'] = $course_info->name;
+                        $res['session_name'] = $session_info->name;
+                        $res['data'] = Storage::get("/advise/{$session->id}.txt");;
+                    } else {
+                        if ($info['status']) {
+                            // không có quyền xem
+                            $res['msg'] =  'Tài liệu bị khóa - bạn không có quyền xem!';
+                        } else {
+                            // yêu cầu đăng nhập
+                            $res['msg'] =  'Vui lòng đăng nhập!';
+                        }
                     }
                 } else {
                     $res['msg'] = 'Tài liệu không tồn tại';

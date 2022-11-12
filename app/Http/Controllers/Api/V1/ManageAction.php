@@ -33,18 +33,24 @@ class ManageAction extends Controller
                 foreach (laction::all() as $course) {
                     $list_session = [];
                     foreach ($course->session()->get() as $session) {
-                        $ppt_status = 0;
+                        // lấy data
+                        $data = Storage::get("/action/{$session->id}.txt");
+                        // dữ liệu trả về
                         $session_info = [
                             'id' => $session->id,
                             'name' => $session->name,
                             'status' => $session->status,
                             'photo' => $session->photo,
+                            'slug' => $session->slug,
+                            'description' => $session->description,
+                            'data' => $data,
                         ];
                         $list_session[] = $session_info;
                     }
                     $list_course[] = [
                         'id' => $course->id,
                         'name' => $course->name,
+                        'slug' => $course->slug,
                         'status' => $course->status,
                         'sessions' => $list_session,
                     ];
@@ -409,6 +415,10 @@ class ManageAction extends Controller
                         $listSesssion = laction_session::select('id')->where('laction_id', $request_all['course_id'])->get();
                         if ($listSesssion && $listSesssion->count() > 0) {
                             foreach ($listSesssion as $session) {
+                                // xóa file data
+                                Storage::delete("/action/{$session->id}.txt");
+
+                                // xóa quyền
                                 laction_session_role::where('laction_session_id', $session->id)->delete();
                             }
                         }
@@ -465,6 +475,15 @@ class ManageAction extends Controller
                                 $session->photo = $imgs[rand(0, count($imgs)-1)];
                             }
                             $session->save();
+
+                            // lưu lại data
+                            $path_file_info = "/action/{$session->id}.txt";
+                            $data = '';
+                            if (!empty($request->data) && is_string($request->data)) {
+                                $data = $request->data;
+                            }
+                            Storage::put($path_file_info, $data);
+
                             $res['status'] = 1;
                             $res['msg'] = 'Đã tạo hoạt động thành công';
                         }
@@ -515,6 +534,13 @@ class ManageAction extends Controller
                             $filename = ((int)(microtime(1)*1000)).'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
                             $file->move(public_path('upload/photo'), $filename);
                             $session->photo = '/upload/photo/' . $filename;
+                            $change = true;
+                        }
+
+                        $path_file_info = "/action/{$session->id}.txt";
+                        $data = Storage::get($path_file_info);
+                        if (!empty($request->data) && is_string($request->data) && $request->data != $data) {
+                            Storage::put($path_file_info, $request->data);
                             $change = true;
                         }
 
@@ -618,13 +644,18 @@ class ManageAction extends Controller
 
         if (Validate::number($res, $request_all, 'session_id', 'Hoạt động')) {
             $info = App::CheckLogin($request);
-            $info = App::CheckLogin($request);
             if ($info['status']) {
                 if (App::auth($info['info_user'], 1)) {
                     // tiến hành tạo :))
                     $session = laction_session::find($request_all['session_id']);
                     if ($session) {
+                        // xóa file data
+                        Storage::delete("/action/{$session->id}.txt");
+
+                        // xóa quyền
                         laction_session_role::where('laction_session_id', $session->id)->delete();
+
+                        // xóa tiết
                         $session->delete();
                         $res['status'] = 1;
                         $res['msg'] = 'Đã tạo hoạt động thành công';
