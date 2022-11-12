@@ -44,7 +44,7 @@ Route::post('/blog/role/check', [ControllersApiV1Home::class, 'blog_role_check']
 Route::post('/course', [ControllersApiV1Home::class, 'course']);
 
 // check quyền xem ppt
-Route::post('ppt/role/check', [ControllersApiV1Home::class, 'course_get_ppt_data']);
+Route::post('course/ppt/get-data', [ControllersApiV1Home::class, 'course_ppt_get_data']);
 
 // lấy danh sách sách kỹ năng để hiển thị ở trang chủ
 Route::post('/book', [ControllersApiV1Home::class, 'book']);

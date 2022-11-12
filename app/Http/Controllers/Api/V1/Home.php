@@ -334,7 +334,7 @@ class Home extends Controller
         ]);
     }
 
-    public function course_get_ppt_data(Request $request) {
+    public function course_ppt_get_data(Request $request) {
         $res = App::Res([
             'link' => '',
         ]);
@@ -499,11 +499,11 @@ class Home extends Controller
 
         if ($check_role) {
             // lấy danh sách quyền đang có
-            $list_role = laction_session_role::select('lbook_session_id')->where('luser_id', $id_user)->get();
+            $list_role = laction_session_role::select('laction_session_id')->where('luser_id', $id_user)->get();
             if ($list_role->count() > 0) {
                 $list_role_tmp = [];
                 foreach ($list_role as $role) {
-                    $list_role_tmp[] = $role->lbook_session_id;
+                    $list_role_tmp[] = $role->laction_session_id;
                 }
                 $list_role = $list_role_tmp;
             } else {
@@ -525,25 +525,14 @@ class Home extends Controller
                 } else {
                     $lock = 0;
                 }
-                $session_info = [
-                    'id' => $session->id,
-                    'name' => $session->name,
-                    'description' => $session->description,
-                    'photo' => $session->photo,
-                    'slug' => $session->slug,
-                    'lock' => $lock,
-                ];
                 if (!$lock) {
-                    if ($session->doctype == 1) {
-                        $data = Storage::get("/book/info/{$session->id}.json");
-                        if ($data) {
-                            $info = json_decode($data, 1);
-                            if ($info['status'] == 1) {
-                                $session_info['doc_type'] = 1;
-                            }
-                        }
-                    }
-                    $list_session[] = $session_info;
+                    $list_session[] = [
+                        'id' => $session->id,
+                        'name' => $session->name,
+                        'description' => $session->description,
+                        'photo' => $session->photo,
+                        'slug' => $session->slug,
+                    ];
                 }
             }
             if (count($list_session)) {
@@ -608,7 +597,7 @@ class Home extends Controller
                         $res['status'] = 1;
                         $res['course_name'] = $course_info->name;
                         $res['session_name'] = $session_info->name;
-                        $res['data'] = Storage::get("/action/{$session->id}.txt");;
+                        $res['data'] = Storage::get("/action/{$request->session_id}.txt") ?? '';
                     } else {
                         if ($info['status']) {
                             // không có quyền xem
@@ -646,11 +635,11 @@ class Home extends Controller
 
         if ($check_role) {
             // lấy danh sách quyền đang có
-            $list_role = laction_session_role::select('lbook_session_id')->where('luser_id', $id_user)->get();
+            $list_role = ladvise_session_role::select('ladvise_session_id')->where('luser_id', $id_user)->get();
             if ($list_role->count() > 0) {
                 $list_role_tmp = [];
                 foreach ($list_role as $role) {
-                    $list_role_tmp[] = $role->lbook_session_id;
+                    $list_role_tmp[] = $role->ladvise_session_id;
                 }
                 $list_role = $list_role_tmp;
             } else {
@@ -659,7 +648,7 @@ class Home extends Controller
         }
 
         $list_course = [];
-        foreach (laction::where('status', 1)->get() as $course) {
+        foreach (ladvise::where('status', 1)->get() as $course) {
             $list_session = [];
             foreach ($course->session()->where('status', 1)->get() as $session) {
                 $ppt_status = 0;
@@ -672,25 +661,14 @@ class Home extends Controller
                 } else {
                     $lock = 0;
                 }
-                $session_info = [
-                    'id' => $session->id,
-                    'name' => $session->name,
-                    'description' => $session->description,
-                    'photo' => $session->photo,
-                    'slug' => $session->slug,
-                    'lock' => $lock,
-                ];
                 if (!$lock) {
-                    if ($session->doctype == 1) {
-                        $data = Storage::get("/book/info/{$session->id}.json");
-                        if ($data) {
-                            $info = json_decode($data, 1);
-                            if ($info['status'] == 1) {
-                                $session_info['doc_type'] = 1;
-                            }
-                        }
-                    }
-                    $list_session[] = $session_info;
+                    $list_session[] = [
+                        'id' => $session->id,
+                        'name' => $session->name,
+                        'description' => $session->description,
+                        'photo' => $session->photo,
+                        'slug' => $session->slug,
+                    ];
                 }
             }
             if (count($list_session)) {
@@ -755,7 +733,7 @@ class Home extends Controller
                         $res['status'] = 1;
                         $res['course_name'] = $course_info->name;
                         $res['session_name'] = $session_info->name;
-                        $res['data'] = Storage::get("/advise/{$session->id}.txt");;
+                        $res['data'] = Storage::get("/advise/{$request->session_id}.txt") ?? '';
                     } else {
                         if ($info['status']) {
                             // không có quyền xem
