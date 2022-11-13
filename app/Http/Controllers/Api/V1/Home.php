@@ -777,6 +777,8 @@ class Home extends Controller
                         'tags' => json_decode($user->tags),
                         'school' => $user->school ?: '',
                         'course' => $user->course ?: '',
+                        'phone' => $user->phone ?? '',
+                        'email' => $user->email ?? '',
                     ];
                 }
                 $res['status'] = 1;
@@ -812,6 +814,8 @@ class Home extends Controller
                                         $luser->role = $request_all['role'];
                                         $luser->school = $request_all['school'];
                                         $luser->course = $request_all['course'];
+                                        $luser->phone = $request_all['phone'];
+                                        $luser->email = $request_all['email'];
 
                                         if ($request->file('avatar')) {
                                             $file = $request->file('avatar');
@@ -908,6 +912,18 @@ class Home extends Controller
                                 }
                             } else {
                                 $next = false;
+                            }
+                        }
+                        if ($next && !empty($request->phone)) {
+                            if ($request_all['phone'] != $user->phone) {
+                                $user->phone = $request_all['phone'];
+                                $change = true;
+                            }
+                        }
+                        if ($next && !empty($request->email)) {
+                            if ($request_all['email'] != $user->email) {
+                                $user->email = $request_all['email'];
+                                $change = true;
                             }
                         }
                         if ($next && !empty($request->role)) {
