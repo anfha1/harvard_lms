@@ -1,0 +1,1 @@
+import{L as o}from"./Basic.41ea6bfc.js";import{d as t,g as n,w as e,a as s,o as r,b as c,h as _}from"./index.41cba84b.js";const l=_("p",null,"Trang kh\xF4ng T\u1ED3n t\u1EA1i!",-1),f=t({__name:"404",setup(u){return(p,d)=>{const a=s("el-card");return r(),n(o,null,{default:e(()=>[c(a,null,{default:e(()=>[l]),_:1})]),_:1})}}});export{f as default};

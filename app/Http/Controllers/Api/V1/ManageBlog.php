@@ -95,7 +95,7 @@ class ManageBlog extends Controller {
                         $data['selection'] = $list_blog;
                     }
                     Storage::put($path_file_info, json_encode($data));
-                    $res['msg'] = 'Đã cập nhật list tin tức';
+                    $res['msg'] = 'Đã cập nhật danh sách tin tức';
                     $res['status'] = 1;
                 } else {
                     $res['msg'] = 'Dữ liệu truyền vào không hợp lệ';
