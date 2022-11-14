@@ -26,6 +26,7 @@ class ManageBlog extends Controller {
         $info = App::CheckLogin($request);
         $res = App::Res([
             'blogs' => [],
+            'selection' => [],
         ]);
 
         if ($info['status']) {
@@ -46,8 +47,59 @@ class ManageBlog extends Controller {
                     $list_blog[] = $blog_info;
                 }
 
+                // lấy danh sách các bài viết được lựa chọn
+                $list_select = [];
+                $path_file_info = "/blog/config.json";
+                $data = json_decode(Storage::get($path_file_info), 1);
+                if (!empty($data) && isset($data['selection'])) {
+                    $list_select = $data['selection'];
+                }
+
                 $res['blogs'] = $list_blog;
+                $res['selection'] = $list_select;
                 $res['status'] = 1;
+            } else {
+                $res['msg'] = 'Bạn không có quyền truy cập!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+        return App::response($res);
+    }
+
+    public function select(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res();
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], 1)) { // chỉ có quản trị viên mới vô đc
+                if ($request->has(['select']) && is_array($request->select)) {
+                    $list_blog = [];
+
+                    foreach ($request->select as $id_blog) {
+                        $id_blog = (int)$id_blog;
+                        if ($id_blog > 0) {
+                            $list_blog[] = $id_blog;
+                        }
+                    }
+
+                    $path_file_info = "/blog/config.json";
+                    $data = json_decode(Storage::get($path_file_info), 1);
+
+                    if (empty($data) || !is_array($data)) {
+                        $data = [
+                            'selection' => $list_blog,
+                        ];
+                    } else {
+                        $data['selection'] = $list_blog;
+                    }
+                    Storage::put($path_file_info, json_encode($data));
+                    $res['msg'] = 'Đã cập nhật list tin tức';
+                    $res['status'] = 1;
+                } else {
+                    $res['msg'] = 'Dữ liệu truyền vào không hợp lệ';
+                }
             } else {
                 $res['msg'] = 'Bạn không có quyền truy cập!';
             }

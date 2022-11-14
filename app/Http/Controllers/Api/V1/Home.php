@@ -34,6 +34,7 @@ use App\Models\laction_session_role;
 use App\Models\ladvise;
 use App\Models\ladvise_session;
 use App\Models\ladvise_session_role;
+use App\Models\lfeedback;
 
 class Home extends Controller
 {
@@ -138,8 +139,15 @@ class Home extends Controller
     }
 
     public function blog1(Request $request) {
+        $list_select = [];
+        $path_file_info = "/blog/config.json";
+        $data = json_decode(Storage::get($path_file_info), 1);
+        if (!empty($data) && isset($data['selection'])) {
+            $list_select = $data['selection'];
+        }
+
         $list_blog = [];
-        foreach (lblog::where('status', 1)->orderBy('id', 'desc')->limit(3)->get() as $blog) {
+        foreach (lblog::whereIn('id', $list_select)->where('status', 1)->orderBy('id', 'desc')->get() as $blog) {
             $list_blog[] = [
                 'id' => $blog->id,
                 'name' => $blog->name,
@@ -154,6 +162,36 @@ class Home extends Controller
             'msg' => '',
             'blogs' => $list_blog,
         ]);
+    }
+
+    public function feedback(Request $request) {
+        $res = App::Res();
+        if (empty($request->name)) {
+            $res['msg'] = 'Tên không được để trống';
+        } else {
+            if (empty($request->phone) && empty($request->email)) {
+                $res['msg'] = 'Email hoặc số điện thoại không được để trống';
+            } else {
+                if (empty($request->content)) {
+                    $res['msg'] = 'Nội dung không được để trống';
+                } else {
+                    $data = [
+                        'name' => $request->name,
+                        'phone' => $request->phone ?? '',
+                        'email' => $request->email ?? '',
+                        'content' => $request->content,
+                    ];
+
+                    $feedback = new lfeedback;
+                    $feedback->content = json_encode($data);
+                    $feedback->save();
+
+                    $res['status'] = 1;
+                    $res['msg'] = 'Đã gửi đi thành công';
+                }
+            }
+        }
+        return App::response($res);
     }
 
     public function blog_role_check(Request $request) {

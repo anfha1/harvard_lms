@@ -37,6 +37,9 @@ Route::post('/blog', [ControllersApiV1Home::class, 'blog']);
 // lấy danh sách tin tức tin tức lấy 2 bài
 Route::post('/blog1', [ControllersApiV1Home::class, 'blog1']);
 
+// lấy danh sách tin tức tin tức lấy 2 bài
+Route::post('/feedback', [ControllersApiV1Home::class, 'feedback']);
+
 // Check quyền giới thiệu
 Route::post('/blog/role/check', [ControllersApiV1Home::class, 'blog_role_check']);
 
@@ -88,6 +91,9 @@ Route::prefix('manage')->group(function () {
     Route::prefix('blog')->controller(ControllersApiV1ManageBlog::class)->group(function () {
         // lấy danh sách blog
         Route::post('/', 'get');
+
+        // lựa chọn blog blog
+        Route::post('/select', 'select');
 
         // hiển thị blog
         Route::post('/show', 'show');
