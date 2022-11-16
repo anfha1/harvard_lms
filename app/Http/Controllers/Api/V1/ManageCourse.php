@@ -1046,4 +1046,31 @@ class ManageCourse extends Controller {
         }
         return $res;
     }
+
+    // các hàm xử lý liên quan
+    private function process_html($file) {
+        $dom = new \DomDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTMLFile($file);
+        $head = $dom->getElementsByTagName('head')[0];
+        $dataHead = '';
+        foreach ($head->childNodes as $child) {
+            if ($child->nodeName != 'meta' && $child->nodeName != '#text' && $child->nodeName != 'title') {
+                if (
+                    $child->nodeName == 'link' &&
+                    $child->hasAttribute('rel') &&
+                    $child->getAttribute('rel') == 'shortcut icon'
+                ) {
+                    // code
+                } else {
+                    $dataHead .= $dom->saveHTML($child);
+                }
+            }
+        }
+        $body = $dom->getElementsByTagName('body')[0];
+        $dataRender['style'] = $dataHead;
+        $dataRender['content'] = $dom->saveHTML($body);
+        libxml_clear_errors();
+        return $dataRender;
+    }
 }

@@ -53,7 +53,9 @@ class App {
                 self::deleteDir($file);
             }
         }
-        rmdir($folder);
+        if (is_dir($folder)) {
+            rmdir($folder);
+        }
     }
 
     public static function auth($info, $role = 2) {
@@ -80,7 +82,7 @@ class App {
                     mkdir($fileNameNew);
                 }
                 // tiếp tục cut thưu mục bên trong
-                self::cut_folder($file, $fileNameNew);
+                self::cutDir($file, $fileNameNew);
             } else {
                 // copy file và xóa file cũ
                 rename($file, $fileNameNew);
