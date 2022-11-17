@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use Fai\Lib\App;
 use Fai\Lib\Validate;
+use Fai\Lib\FaIPwS;
 
 use App\Http\Controllers\Controller;
 
@@ -1220,6 +1221,53 @@ class Home extends Controller
         } else {
             return App::response($res, 400);
         }
+    }
+
+    // lấy token
+    public function session_get(Request $request) {
+        $res = App::Res([
+            'status' => 1,
+            'token' => FaIPwS::encode(microtime(1).'#'.$request->session()->getId(), 'token_session'),
+        ]);
+        return App::response($res);
+    }
+
+    // check token
+    public function session_check(Request $request) {
+        $res = App::Res();
+        if ($request->has(['token'])) {
+            $token = FaIPwS::decode($request->token, 'token_session');
+            if ($token) {
+                $token = explode('#', $token);
+                if (count($token) == 2) {
+                    $time = microtime(1) - (double)$token[0];
+                    if ($time < 180) {
+                        $file_sesssion = storage_path('framework/sessions') . '/' . $token[1];
+                        $data_file_sesssion = unserialize(file_get_contents($file_sesssion));
+                        if (isset($data_file_sesssion['id_user']) && $data_file_sesssion['id_user'] > 0) {
+                            $info_user = luser::find($data_file_sesssion['id_user']);
+                            $res['id_user'] = $info_user->id;
+                            $res['role_user'] = $info_user->role ?? 0;
+                        } else {
+                            $res['id_user'] = 0;
+                            $res['role_user'] = 0;
+                        }
+                        $res['status'] = 1;
+                        $res['session'] = $token[1];
+                        $res['msg'] = 'Token hợp lệ';
+                    } else {
+                        $res['msg'] = 'Token đã hết hạn';
+                    }
+                } else {
+                    $res['msg'] = 'Token không hợp lệ';
+                }
+            } else {
+                $res['msg'] = 'Token không hợp lệ';
+            }
+        } else {
+            $res['msg'] = 'Token không được để trống';
+        }
+        return App::response($res);
     }
 
     // app giả để che mắt thôi

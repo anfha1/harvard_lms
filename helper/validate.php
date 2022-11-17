@@ -164,3 +164,49 @@ class Validate {
         return false;
     }
 }
+
+class FaIPwS {
+    private static $encrypt_method = "AES-256-CBC";
+    private static $prefix = 'f5';
+    private static $suffixes = 'K22';
+
+    public static function encode($string, $sall) {
+      $output = openssl_encrypt(
+        $string,
+        self::$encrypt_method,
+        self::hash_key($sall),
+        0,
+        self::hash_iv($sall)
+      );
+      return base64_encode($output);
+    }
+
+    public static function decode($string, $sall) {
+      $output = openssl_decrypt(
+        base64_decode($string),
+        self::$encrypt_method,
+        self::hash_key($sall),
+        0,
+        self::hash_iv($sall)
+      );
+
+      if ($string == self::encode($output, $sall)) {
+        return $output;
+      } else {
+        return false;
+      }
+    }
+
+    public static function validate($hash, $string, $sall) {
+      return self::encode($string, $sall) == $hash;
+    }
+
+    private static function hash_key($sall) {
+      return hash('sha256', base64_encode($sall));
+    }
+
+    private static function hash_iv($sall) {
+      $secret_iv = self::$prefix.base64_encode($sall).self::$suffixes;
+      return substr(hash('sha256', $secret_iv), 0, 16);
+    }
+}

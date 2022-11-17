@@ -28,6 +28,12 @@ Route::post('/user/info', [ControllersApiV1Home::class, 'check_info']);
 // Đăng nhập
 Route::post('/login', [ControllersApiV1Home::class, 'login']);
 
+// session get
+Route::post('/session/get', [ControllersApiV1Home::class, 'session_get']);
+
+// session get
+Route::post('/session/check', [ControllersApiV1Home::class, 'session_check']);
+
 // đăng xuất
 Route::post('/logout', [ControllersApiV1Home::class, 'logout']);
 
