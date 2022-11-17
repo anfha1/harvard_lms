@@ -309,6 +309,9 @@ Route::prefix('manage')->group(function () {
             Route::post('/delete', 'session_delete');
         });
     });
+
+    // phẩn hồi
+    Route::post('/feedback', [ControllersApiV1Home::class, 'manage_feedback']);
 });
 
 // đây là thông tin của pdf view

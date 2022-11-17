@@ -195,6 +195,29 @@ class Home extends Controller
         return App::response($res);
     }
 
+    public function manage_feedback(Request $request) {
+        $info = App::CheckLogin($request);
+        $res = App::Res([
+            'list_feedback' => [],
+        ]);
+
+        if ($info['status']) {
+            if (App::auth($info['info_user'], [1, 2])) {
+                $list_feedback = lfeedback::all()->sortByDesc('id');
+                foreach ($list_feedback as $feedback) {
+                    $res['list_feedback'][] = $feedback;
+                }
+                $res['status'] = 1;
+            } else {
+                $res['msg'] = 'Bạn không có quyền truy cập!';
+            }
+        } else {
+            $res['msg'] = 'Vui lòng đăng nhập!';
+            $res['check_login'] = 1;
+        }
+        return App::response($res);
+    }
+
     public function blog_role_check(Request $request) {
         $res = App::Res([
             'data' => '',
