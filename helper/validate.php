@@ -32,7 +32,7 @@ class Validate {
             $res['msg'] = "{$name} Không được để trống";
             return false;
         } else if (is_string($request[$key])) {
-            if (strlen($request[$key] < 5)) {
+            if (strlen($request[$key]) < 5) {
                 $res['msg'] = "{$name} Không được ít hơn 5 ký tự";
                 return false;
             } else if (strlen($request[$key]) > 25) {
@@ -60,7 +60,7 @@ class Validate {
             $res['msg'] = "{$name} Không được để trống";
             return false;
         } else if (is_string($request[$key])) {
-            if (strlen($request[$key] < 5)) {
+            if (strlen($request[$key]) < 5) {
                 $res['msg'] = "{$name} Không được ít hơn 5 ký tự";
                 return false;
             } else if (strlen($request[$key]) > 25) {
